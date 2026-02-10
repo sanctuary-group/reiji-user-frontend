@@ -371,6 +371,12 @@
   background: var(--hover-bg);
 }
 
+.sidebar-child-link.active {
+  color: var(--color-primary);
+  background: var(--color-primary-bg);
+  font-weight: var(--font-semibold);
+}
+
 .sidebar-line-cta {
   display: flex;
   align-items: center;

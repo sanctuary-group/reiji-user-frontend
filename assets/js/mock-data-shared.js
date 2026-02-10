@@ -28,9 +28,9 @@ var MOCK_SIDEBAR_LINKS = [
     icon: '&#128200;',
     items: [
       { label: 'カレンダー', href: 'calendar.html' },
-      { label: '月間損益', href: 'report.html' },
-      { label: '年間損益', href: 'report.html' },
-      { label: '生涯損益', href: 'report.html' },
+      { label: '月間損益', href: 'report.html', period: 'monthly' },
+      { label: '年間損益', href: 'report.html', period: 'yearly' },
+      { label: '生涯損益', href: 'report.html', period: 'lifetime' },
       { label: '損益グラフ', href: '#' },
       { label: '口座入出金管理', href: '#' }
     ]

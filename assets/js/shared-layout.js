@@ -89,11 +89,17 @@
     var container = document.getElementById('sidebarGroups');
     if (!container || typeof MOCK_SIDEBAR_LINKS === 'undefined') return;
 
+    var currentPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+    // Detect initial active period from report tab if on report page
+    var activePeriodTab = document.querySelector('.report-period-tab.active');
+    var activePeriod = activePeriodTab ? activePeriodTab.getAttribute('data-period') : null;
+    var activeGroupIndex = -1;
+    var activeFound = false;
+
     var html = '';
     for (var i = 0; i < MOCK_SIDEBAR_LINKS.length; i++) {
       var group = MOCK_SIDEBAR_LINKS[i];
-      var openClass = i === 0 ? ' open' : '';
-      html += '<div class="sidebar-group-item' + openClass + '">';
+      html += '<div class="sidebar-group-item">';
       html += '<button class="sidebar-group-header">' +
         '<span class="sidebar-group-icon">' + group.icon + '</span>' +
         '<span class="sidebar-group-label">' + group.label + '</span>' +
@@ -101,12 +107,29 @@
       '</button>';
       html += '<div class="sidebar-group-children">';
       for (var j = 0; j < group.items.length; j++) {
-        html += '<a href="' + group.items[j].href + '" class="sidebar-child-link">' + group.items[j].label + '</a>';
+        var item = group.items[j];
+        var periodAttr = item.period ? ' data-period="' + item.period + '"' : '';
+        var isActive;
+        if (item.period && item.href === currentPage) {
+          isActive = item.period === activePeriod;
+        } else {
+          isActive = !activeFound && item.href === currentPage;
+        }
+        var activeClass = isActive ? ' active' : '';
+        if (isActive) { activeGroupIndex = i; activeFound = true; }
+        html += '<a href="' + item.href + '" class="sidebar-child-link' + activeClass + '"' + periodAttr + '>' + item.label + '</a>';
       }
       html += '</div>';
       html += '</div>';
     }
     container.innerHTML = html;
+
+    // Open the group containing the active link, or the first group as fallback
+    var groups = container.querySelectorAll('.sidebar-group-item');
+    var openIndex = activeGroupIndex >= 0 ? activeGroupIndex : 0;
+    if (groups[openIndex]) {
+      groups[openIndex].classList.add('open');
+    }
 
     // Accordion click handlers
     var headers = container.querySelectorAll('.sidebar-group-header');
@@ -114,6 +137,28 @@
       headers[k].addEventListener('click', function () {
         var item = this.parentElement;
         item.classList.toggle('open');
+      });
+    }
+
+    // Period-based sidebar link click handlers
+    var periodLinks = container.querySelectorAll('.sidebar-child-link[data-period]');
+    for (var p = 0; p < periodLinks.length; p++) {
+      periodLinks[p].addEventListener('click', function (e) {
+        var period = this.getAttribute('data-period');
+        var href = this.getAttribute('href');
+        if (currentPage === href && window._switchReportPeriod) {
+          // Already on report page — just switch period without navigation
+          e.preventDefault();
+          window._switchReportPeriod(period);
+          // Update sidebar active states
+          for (var q = 0; q < periodLinks.length; q++) {
+            periodLinks[q].classList.toggle('active', periodLinks[q].getAttribute('data-period') === period);
+          }
+        } else {
+          // Navigate to report page with period param
+          e.preventDefault();
+          window.location.href = href + '?period=' + period;
+        }
       });
     }
   }
@@ -179,6 +224,18 @@
 
   // Make renderCryptoRates accessible for tab switching
   window._renderCryptoRates = renderCryptoRates;
+
+  // Update sidebar active link by period (called from report.js)
+  window._updateSidebarPeriod = function (period) {
+    var links = document.querySelectorAll('.sidebar-child-link[data-period]');
+    for (var i = 0; i < links.length; i++) {
+      if (links[i].getAttribute('data-period') === period) {
+        links[i].classList.add('active');
+      } else {
+        links[i].classList.remove('active');
+      }
+    }
+  };
 
   function initCryptoTabs() {
     var tabs = document.querySelectorAll('.right-crypto-tab');

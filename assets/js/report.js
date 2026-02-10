@@ -9,10 +9,33 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     startClock();
+    // Check URL param for initial period (e.g. report.html?period=yearly)
+    var urlParams = new URLSearchParams(window.location.search);
+    var paramPeriod = urlParams.get('period');
+    if (paramPeriod && (paramPeriod === 'monthly' || paramPeriod === 'yearly' || paramPeriod === 'lifetime')) {
+      currentPeriod = paramPeriod;
+      var tabs = document.querySelectorAll('.report-period-tab');
+      tabs.forEach(function (t) {
+        t.classList.toggle('active', t.getAttribute('data-period') === currentPeriod);
+      });
+      if (window._updateSidebarPeriod) window._updateSidebarPeriod(currentPeriod);
+    }
     initPeriodTabs();
     initNavigation();
     renderReport();
   });
+
+  // Expose period switch for sidebar links
+  window._switchReportPeriod = function (period) {
+    if (period === currentPeriod) return;
+    currentPeriod = period;
+    var tabs = document.querySelectorAll('.report-period-tab');
+    tabs.forEach(function (t) {
+      t.classList.toggle('active', t.getAttribute('data-period') === currentPeriod);
+    });
+    if (window._updateSidebarPeriod) window._updateSidebarPeriod(currentPeriod);
+    renderReport();
+  };
 
   /* ---- Clock ---- */
   function startClock() {
@@ -48,6 +71,7 @@
         tabs.forEach(function (t) { t.classList.remove('active'); });
         this.classList.add('active');
         currentPeriod = this.getAttribute('data-period');
+        if (window._updateSidebarPeriod) window._updateSidebarPeriod(currentPeriod);
         renderReport();
       });
     });
