@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>REIJI - 投資を、もっとスマートに。</title>
+  <meta name="description" content="投資損益をカレンダーで記録・可視化。仲間と成績を共有できる交流型投資SNS。">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/pages/landing.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/img/logo.svg" alt="REIJI">
+        <span class="nav-logo-text">REIJI</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="active">ホーム</a>
+        <a href="#features">機能紹介</a>
+        <a href="#users">注目の投資家</a>
+      </div>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="テーマ切替"></button>
+        <a href="login.html" class="btn btn-primary hide-mobile">ログイン</a>
+      </div>
+      <button class="hamburger" aria-label="メニュー">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu">
+    <a href="index.html">ホーム</a>
+    <a href="#features">機能紹介</a>
+    <a href="#users">注目の投資家</a>
+    <a href="login.html">ログイン</a>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="container hero-content">
+      <h1 class="hero-title">投資を、もっとスマートに。</h1>
+      <p class="hero-subtitle">あなたの投資損益をカレンダーで記録・可視化。<br>仲間と成績を共有できる投資SNS。</p>
+      <div class="hero-actions">
+        <a href="login.html" class="btn btn-primary btn-lg">無料で始める</a>
+        <a href="dashboard.html" class="btn btn-secondary btn-lg">デモを見る</a>
+      </div>
+      <!-- Mini Calendar Preview -->
+      <div class="hero-preview">
+        <div class="mini-calendar">
+          <div class="mini-calendar-header">
+            <span>2026年2月</span>
+          </div>
+          <div class="mini-calendar-grid">
+            <span class="mini-day-header sun">日</span>
+            <span class="mini-day-header">月</span>
+            <span class="mini-day-header">火</span>
+            <span class="mini-day-header">水</span>
+            <span class="mini-day-header">木</span>
+            <span class="mini-day-header">金</span>
+            <span class="mini-day-header sat">土</span>
+            <span class="mini-day empty">1</span>
+            <span class="mini-day profit">2<small>+45,200</small></span>
+            <span class="mini-day loss">3<small>-12,000</small></span>
+            <span class="mini-day profit">4<small>+28,000</small></span>
+            <span class="mini-day profit">5<small>+15,600</small></span>
+            <span class="mini-day loss">6<small>-8,400</small></span>
+            <span class="mini-day empty">7</span>
+            <span class="mini-day empty">8</span>
+            <span class="mini-day profit today">9<small>+52,000</small></span>
+            <span class="mini-day">10</span>
+            <span class="mini-day">11</span>
+            <span class="mini-day">12</span>
+            <span class="mini-day">13</span>
+            <span class="mini-day">14</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">REIJIの特徴</h2>
+        <p class="section-subtitle">投資家のための、投資家が作ったツール</p>
+      </div>
+      <div class="grid grid-4 features-grid">
+        <div class="card card-glass feature-card">
+          <div class="feature-icon">&#128197;</div>
+          <h3 class="feature-title">損益カレンダー</h3>
+          <p class="feature-desc">日々の投資損益をカレンダー形式で記録。カテゴリ別に色分けして、一目で成績を把握できます。</p>
+        </div>
+        <div class="card card-glass feature-card">
+          <div class="feature-icon">&#128200;</div>
+          <h3 class="feature-title">パフォーマンス分析</h3>
+          <p class="feature-desc">月間・年間・生涯の損益を自動集計。勝率やカテゴリ別の傾向をグラフで可視化します。</p>
+        </div>
+        <div class="card card-glass feature-card">
+          <div class="feature-icon">&#129309;</div>
+          <h3 class="feature-title">投資家コミュニティ</h3>
+          <p class="feature-desc">投資仲間と成績を共有。ブログ機能やフォロー機能で、投資家同士のつながりを深めます。</p>
+        </div>
+        <div class="card card-glass feature-card">
+          <div class="feature-icon">&#128241;</div>
+          <h3 class="feature-title">マルチデバイス対応</h3>
+          <p class="feature-desc">PC・スマホ・タブレット対応。いつでもどこでも損益を記録・確認できます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Users Section -->
+  <section id="users" class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">注目の投資家</h2>
+        <p class="section-subtitle">今月活躍中のトレーダー</p>
+      </div>
+      <div class="grid grid-3 users-grid" id="popularUsers">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <div class="container text-center">
+      <h2 class="cta-title">今すぐ始めよう</h2>
+      <p class="cta-desc">無料で投資損益の記録を始められます。</p>
+      <a href="login.html" class="btn btn-lg cta-btn">無料で登録する</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="footer-brand-name">REIJI</span>
+          <p class="footer-brand-desc">投資損益を記録・可視化する交流型投資SNS。あなたの投資をもっとスマートに。</p>
+        </div>
+        <div>
+          <h4 class="footer-heading">サービス</h4>
+          <div class="footer-links">
+            <a href="#features">機能紹介</a>
+            <a href="#users">投資家一覧</a>
+            <a href="#">ランキング</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-heading">サポート</h4>
+          <div class="footer-links">
+            <a href="#">利用規約</a>
+            <a href="#">プライバシーポリシー</a>
+            <a href="#">お問い合わせ</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 REIJI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/landing.js"></script>
+</body>
+</html>

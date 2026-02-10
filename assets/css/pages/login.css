@@ -1,0 +1,144 @@
+/* ========================================
+   Login Page Styles
+   ======================================== */
+
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 64px);
+  padding: var(--space-6);
+}
+
+.login-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.login-logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-4);
+}
+
+.login-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.login-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* ---- OAuth Buttons ---- */
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.btn-oauth {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-md);
+  gap: var(--space-3);
+  transition: all var(--transition-base);
+}
+
+.btn-google {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+}
+
+.btn-google:hover {
+  background: var(--hover-bg);
+  border-color: var(--border-secondary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.btn-yahoo {
+  background: linear-gradient(135deg, #ff0033, #cc0029);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(255, 0, 51, 0.25);
+}
+
+.btn-yahoo:hover {
+  box-shadow: 0 6px 24px rgba(255, 0, 51, 0.35);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-x {
+  background: #000000;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-x {
+  background: #333333;
+}
+
+.btn-x:hover {
+  background: #1a1a1a;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-x:hover {
+  background: #444444;
+}
+
+/* ---- Login Form ---- */
+.login-form {
+  margin-bottom: var(--space-4);
+}
+
+.login-submit {
+  margin-top: var(--space-2);
+}
+
+/* ---- Footer Links ---- */
+.login-footer {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  font-size: var(--text-sm);
+}
+
+.login-footer a {
+  color: var(--text-secondary);
+}
+
+.login-footer a:hover {
+  color: var(--color-primary);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .login-page {
+    padding: var(--space-4);
+    align-items: flex-start;
+    padding-top: var(--space-8);
+  }
+
+  .login-card {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+  }
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>損益カレンダー - REIJI</title>
+  <meta name="description" content="投資損益をカレンダーで記録・確認">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/pages/calendar.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/img/logo.svg" alt="REIJI">
+        <span class="nav-logo-text">REIJI</span>
+      </a>
+      <div class="nav-links">
+        <a href="dashboard.html">ダッシュボード</a>
+        <a href="calendar.html" class="active">カレンダー</a>
+      </div>
+      <div class="nav-datetime" id="navDatetime"></div>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="テーマ切替"></button>
+        <div class="nav-user hide-mobile">
+          <div class="avatar avatar-sm"><img src="assets/img/avatars/default.svg" alt=""></div>
+          <span class="nav-user-name">投資太郎</span>
+        </div>
+      </div>
+      <button class="hamburger" aria-label="メニュー">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu">
+    <a href="dashboard.html">ダッシュボード</a>
+    <a href="calendar.html">カレンダー</a>
+    <a href="index.html">ログアウト</a>
+  </div>
+
+  <!-- Calendar Content -->
+  <main class="section">
+    <div class="container">
+      <!-- Calendar Header -->
+      <div class="cal-header">
+        <div class="cal-nav">
+          <button class="btn btn-ghost cal-nav-btn" id="prevMonth" aria-label="前月">&lt;</button>
+          <h1 class="cal-title" id="calTitle">2026年2月</h1>
+          <button class="btn btn-ghost cal-nav-btn" id="nextMonth" aria-label="次月">&gt;</button>
+        </div>
+        <div class="cal-summary" id="calSummary">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Category Summary -->
+      <div class="cal-categories" id="calCategories">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Calendar Grid -->
+      <div class="cal-grid-wrapper">
+        <div class="cal-weekdays">
+          <span class="cal-weekday sun">日</span>
+          <span class="cal-weekday">月</span>
+          <span class="cal-weekday">火</span>
+          <span class="cal-weekday">水</span>
+          <span class="cal-weekday">木</span>
+          <span class="cal-weekday">金</span>
+          <span class="cal-weekday sat">土</span>
+        </div>
+        <div class="cal-grid" id="calGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Day Detail Modal -->
+  <div class="modal-overlay" id="dayModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">2026年2月9日</h2>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div id="modalBody">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="margin-top: 0; border-top: none;">
+        &copy; 2026 REIJI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/calendar.js"></script>
+</body>
+</html>

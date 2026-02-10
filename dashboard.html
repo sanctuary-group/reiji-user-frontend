@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ダッシュボード - REIJI</title>
+  <meta name="description" content="あなたの投資成績をまとめてチェック">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/pages/dashboard.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/img/logo.svg" alt="REIJI">
+        <span class="nav-logo-text">REIJI</span>
+      </a>
+      <div class="nav-links">
+        <a href="dashboard.html" class="active">ダッシュボード</a>
+        <a href="calendar.html">カレンダー</a>
+      </div>
+      <div class="nav-datetime" id="navDatetime"></div>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="テーマ切替"></button>
+        <div class="nav-user hide-mobile">
+          <div class="avatar avatar-sm"><img src="assets/img/avatars/default.svg" alt=""></div>
+          <span class="nav-user-name" id="navUserName">投資太郎</span>
+        </div>
+      </div>
+      <button class="hamburger" aria-label="メニュー">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu">
+    <a href="dashboard.html">ダッシュボード</a>
+    <a href="calendar.html">カレンダー</a>
+    <a href="index.html">ログアウト</a>
+  </div>
+
+  <!-- Dashboard Content -->
+  <main class="section">
+    <div class="container dashboard-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <!-- Sidebar Profile -->
+        <div class="sidebar-profile">
+          <div class="sidebar-profile-top">
+            <div class="avatar avatar-lg avatar-ring">
+              <img src="assets/img/avatars/default.svg" alt="">
+            </div>
+            <div class="sidebar-profile-info">
+              <div class="sidebar-profile-name" id="sidebarName">投資太郎</div>
+              <span class="badge badge-primary sidebar-profile-style" id="sidebarStyle">デイトレード / 日本株</span>
+            </div>
+          </div>
+          <p class="sidebar-profile-bio" id="sidebarBio">日本株をメインにデイトレード・スイングトレードを行っています。</p>
+          <div class="sidebar-profile-metrics" id="sidebarMetrics">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="sidebar-menu-item active">
+            <span class="sidebar-menu-icon">&#127968;</span>
+            <span class="sidebar-menu-text">ダッシュボード</span>
+          </a>
+          <a href="calendar.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128197;</span>
+            <span class="sidebar-menu-text">損益カレンダー</span>
+          </a>
+          <a href="report.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128200;</span>
+            <span class="sidebar-menu-text">レポート</span>
+          </a>
+          <a href="#" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128176;</span>
+            <span class="sidebar-menu-text">資産推移</span>
+          </a>
+          <div class="sidebar-divider"></div>
+          <a href="settings.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#9881;&#65039;</span>
+            <span class="sidebar-menu-text">設定</span>
+          </a>
+          <a href="index.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128682;</span>
+            <span class="sidebar-menu-text">ログアウト</span>
+          </a>
+        </nav>
+      </aside>
+      <!-- Sidebar Overlay (mobile) -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content -->
+      <div class="dashboard-main">
+        <!-- P&L Summary Cards -->
+        <div class="grid grid-3 pnl-cards" id="pnlCards">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="section-header mt-8">
+          <h2 class="section-title">最近のアクティビティ</h2>
+        </div>
+        <div class="activity-list" id="activityList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="margin-top: 0; border-top: none;">
+        &copy; 2026 REIJI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設定 - REIJI</title>
+  <meta name="description" content="プロフィールやアプリの設定を管理">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/pages/dashboard.css">
+  <link rel="stylesheet" href="assets/css/pages/settings.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="nav-logo">
+        <img src="assets/img/logo.svg" alt="REIJI">
+        <span class="nav-logo-text">REIJI</span>
+      </a>
+      <div class="nav-links">
+        <a href="dashboard.html">ダッシュボード</a>
+        <a href="calendar.html">カレンダー</a>
+      </div>
+      <div class="nav-datetime" id="navDatetime"></div>
+      <div class="nav-actions">
+        <button class="theme-toggle" aria-label="テーマ切替"></button>
+        <div class="nav-user hide-mobile">
+          <div class="avatar avatar-sm"><img src="assets/img/avatars/default.svg" alt=""></div>
+          <span class="nav-user-name" id="navUserName">投資太郎</span>
+        </div>
+      </div>
+      <button class="hamburger" aria-label="メニュー">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu">
+    <a href="dashboard.html">ダッシュボード</a>
+    <a href="calendar.html">カレンダー</a>
+    <a href="report.html">レポート</a>
+    <a href="settings.html">設定</a>
+    <a href="index.html">ログアウト</a>
+  </div>
+
+  <!-- Settings Content -->
+  <main class="section">
+    <div class="container dashboard-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <!-- Sidebar Profile -->
+        <div class="sidebar-profile">
+          <div class="sidebar-profile-top">
+            <div class="avatar avatar-lg avatar-ring">
+              <img src="assets/img/avatars/default.svg" alt="">
+            </div>
+            <div class="sidebar-profile-info">
+              <div class="sidebar-profile-name" id="sidebarName">投資太郎</div>
+              <span class="badge badge-primary sidebar-profile-style" id="sidebarStyle">デイトレード / 日本株</span>
+            </div>
+          </div>
+          <p class="sidebar-profile-bio" id="sidebarBio">日本株をメインにデイトレード・スイングトレードを行っています。</p>
+          <div class="sidebar-profile-metrics" id="sidebarMetrics">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#127968;</span>
+            <span class="sidebar-menu-text">ダッシュボード</span>
+          </a>
+          <a href="calendar.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128197;</span>
+            <span class="sidebar-menu-text">損益カレンダー</span>
+          </a>
+          <a href="report.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128200;</span>
+            <span class="sidebar-menu-text">レポート</span>
+          </a>
+          <a href="#" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128176;</span>
+            <span class="sidebar-menu-text">資産推移</span>
+          </a>
+          <div class="sidebar-divider"></div>
+          <a href="settings.html" class="sidebar-menu-item active">
+            <span class="sidebar-menu-icon">&#9881;&#65039;</span>
+            <span class="sidebar-menu-text">設定</span>
+          </a>
+          <a href="index.html" class="sidebar-menu-item">
+            <span class="sidebar-menu-icon">&#128682;</span>
+            <span class="sidebar-menu-text">ログアウト</span>
+          </a>
+        </nav>
+      </aside>
+      <!-- Sidebar Overlay (mobile) -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content -->
+      <div class="dashboard-main">
+        <div class="settings-header">
+          <h1 class="settings-page-title">設定</h1>
+          <p class="settings-page-desc">プロフィールやアプリの設定を管理できます。</p>
+        </div>
+
+        <!-- Settings Navigation Tabs -->
+        <div class="settings-tabs" id="settingsTabs">
+          <button class="settings-tab active" data-tab="profile">プロフィール</button>
+          <button class="settings-tab" data-tab="goal">目標設定</button>
+          <button class="settings-tab" data-tab="categories">カテゴリ管理</button>
+          <button class="settings-tab" data-tab="display">表示設定</button>
+          <button class="settings-tab" data-tab="notification">通知</button>
+          <button class="settings-tab" data-tab="account">アカウント</button>
+        </div>
+
+        <!-- Tab: Profile -->
+        <div class="settings-panel active" id="panel-profile">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">プロフィール編集</h2>
+            </div>
+            <form id="profileForm" onsubmit="return false;">
+              <!-- Avatar -->
+              <div class="settings-avatar-section">
+                <div class="avatar avatar-xl avatar-ring">
+                  <img src="assets/img/avatars/default.svg" alt="">
+                </div>
+                <div class="settings-avatar-actions">
+                  <button type="button" class="btn btn-secondary btn-sm">画像を変更</button>
+                  <span class="settings-avatar-hint">JPG, PNG 最大2MB</span>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="settingsName">表示名</label>
+                <input class="form-input" type="text" id="settingsName" value="投資太郎">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="settingsBio">自己紹介</label>
+                <textarea class="form-input form-textarea" id="settingsBio" rows="3" placeholder="自己紹介を入力...">日本株をメインにデイトレード・スイングトレードを行っています。2020年から投資を始め、コツコツ利益を積み上げています。</textarea>
+                <span class="form-hint" id="bioCount">0/200</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="settingsStyle">投資スタイル</label>
+                <select class="form-input form-select" id="settingsStyle">
+                  <option value="デイトレード / 日本株" selected>デイトレード / 日本株</option>
+                  <option value="スイングトレード / 日本株">スイングトレード / 日本株</option>
+                  <option value="長期投資 / 日本株">長期投資 / 日本株</option>
+                  <option value="デイトレード / 米国株">デイトレード / 米国株</option>
+                  <option value="長期投資 / 米国株">長期投資 / 米国株</option>
+                  <option value="FX / デイトレード">FX / デイトレード</option>
+                  <option value="FX / スイング">FX / スイング</option>
+                  <option value="仮想通貨 / 短期">仮想通貨 / 短期</option>
+                  <option value="仮想通貨 / 長期">仮想通貨 / 長期</option>
+                  <option value="インデックス / 積立">インデックス / 積立</option>
+                </select>
+              </div>
+
+              <div class="settings-form-actions">
+                <button type="submit" class="btn btn-primary" id="saveProfile">保存する</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tab: Goal -->
+        <div class="settings-panel" id="panel-goal">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">年間目標</h2>
+              <p class="settings-card-desc">レポートの進捗表示に反映されます。</p>
+            </div>
+            <form id="goalForm" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label" for="settingsGoalYear">対象年</label>
+                <select class="form-input form-select" id="settingsGoalYear">
+                  <option value="2026" selected>2026年</option>
+                  <option value="2025">2025年</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="settingsGoalAmount">年間目標金額（円）</label>
+                <input class="form-input" type="text" id="settingsGoalAmount" value="3,000,000" inputmode="numeric">
+                <span class="form-hint">例: 3,000,000</span>
+              </div>
+
+              <div class="settings-goal-preview">
+                <div class="settings-goal-preview-label">月平均必要額</div>
+                <div class="settings-goal-preview-value font-mono" id="goalMonthlyAvg">250,000円</div>
+              </div>
+
+              <div class="settings-form-actions">
+                <button type="submit" class="btn btn-primary" id="saveGoal">保存する</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tab: Categories -->
+        <div class="settings-panel" id="panel-categories">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">取引カテゴリ</h2>
+              <p class="settings-card-desc">損益記録に使用するカテゴリを管理します。</p>
+            </div>
+
+            <div class="settings-cat-list" id="categoryList">
+              <!-- Populated by JS -->
+            </div>
+
+            <div class="settings-form-actions">
+              <button type="button" class="btn btn-secondary" id="addCategory">カテゴリを追加</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Display -->
+        <div class="settings-panel" id="panel-display">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">表示設定</h2>
+            </div>
+
+            <!-- Theme -->
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">テーマ</div>
+                <div class="settings-row-desc">アプリの表示テーマを選択</div>
+              </div>
+              <div class="settings-theme-options" id="themeOptions">
+                <button class="settings-theme-btn" data-theme="light">
+                  <span class="settings-theme-icon">&#9728;&#65039;</span>
+                  <span>ライト</span>
+                </button>
+                <button class="settings-theme-btn" data-theme="dark">
+                  <span class="settings-theme-icon">&#127769;</span>
+                  <span>ダーク</span>
+                </button>
+                <button class="settings-theme-btn" data-theme="system">
+                  <span class="settings-theme-icon">&#128187;</span>
+                  <span>システム</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <!-- Currency display -->
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">金額の表示形式</div>
+                <div class="settings-row-desc">損益金額の表示方法</div>
+              </div>
+              <select class="form-input form-select settings-row-select" id="currencyFormat">
+                <option value="yen" selected>+1,234円</option>
+                <option value="yen-sign">&yen;1,234</option>
+                <option value="man">+0.1234万円</option>
+              </select>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <!-- Week start -->
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">週の開始日</div>
+                <div class="settings-row-desc">カレンダーの週開始日</div>
+              </div>
+              <select class="form-input form-select settings-row-select" id="weekStart">
+                <option value="sun" selected>日曜日</option>
+                <option value="mon">月曜日</option>
+              </select>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <!-- P&L color -->
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">損益カラー</div>
+                <div class="settings-row-desc">利益・損失の表示色</div>
+              </div>
+              <select class="form-input form-select settings-row-select" id="pnlColor">
+                <option value="jp" selected>日本式（利益:赤 / 損失:緑）</option>
+                <option value="us">米国式（利益:緑 / 損失:赤）</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Notification -->
+        <div class="settings-panel" id="panel-notification">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">通知設定</h2>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">デイリーリマインダー</div>
+                <div class="settings-row-desc">毎日の損益記録を促す通知</div>
+              </div>
+              <label class="settings-toggle">
+                <input type="checkbox" id="notifyDaily" checked>
+                <span class="settings-toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">週次レポート通知</div>
+                <div class="settings-row-desc">毎週末に成績サマリーを通知</div>
+              </div>
+              <label class="settings-toggle">
+                <input type="checkbox" id="notifyWeekly" checked>
+                <span class="settings-toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">フォロワー通知</div>
+                <div class="settings-row-desc">新しいフォロワーの通知</div>
+              </div>
+              <label class="settings-toggle">
+                <input type="checkbox" id="notifyFollower">
+                <span class="settings-toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">いいね通知</div>
+                <div class="settings-row-desc">投稿へのいいね通知</div>
+              </div>
+              <label class="settings-toggle">
+                <input type="checkbox" id="notifyLike">
+                <span class="settings-toggle-track"></span>
+              </label>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">リマインダー時刻</div>
+                <div class="settings-row-desc">デイリーリマインダーの送信時刻</div>
+              </div>
+              <input type="time" class="form-input settings-row-time" id="notifyTime" value="20:00">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Account -->
+        <div class="settings-panel" id="panel-account">
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">アカウント情報</h2>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">メールアドレス</div>
+                <div class="settings-row-desc">taro.toushi@example.com</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">変更</button>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">パスワード</div>
+                <div class="settings-row-desc">最終変更: 2026年1月15日</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">変更</button>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">連携アカウント</div>
+                <div class="settings-row-desc">Google でログイン中</div>
+              </div>
+              <span class="badge badge-accent">連携済み</span>
+            </div>
+          </div>
+
+          <!-- Data Export -->
+          <div class="settings-card mt-6">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">データエクスポート</h2>
+              <p class="settings-card-desc">損益データをCSV形式でダウンロードできます。</p>
+            </div>
+            <div class="settings-form-actions" style="margin-top: 0;">
+              <button class="btn btn-secondary" id="exportCsv">CSVダウンロード</button>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="settings-card settings-danger mt-6">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title settings-danger-title">危険な操作</h2>
+            </div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">データの全削除</div>
+                <div class="settings-row-desc">すべての損益データを削除します。この操作は取り消せません。</div>
+              </div>
+              <button class="btn btn-danger btn-sm" id="deleteData">データ削除</button>
+            </div>
+
+            <div class="settings-divider"></div>
+
+            <div class="settings-row">
+              <div class="settings-row-info">
+                <div class="settings-row-label">アカウント削除</div>
+                <div class="settings-row-desc">アカウントと全てのデータを完全に削除します。</div>
+              </div>
+              <button class="btn btn-danger btn-sm" id="deleteAccount">アカウント削除</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="settings-toast" id="settingsToast">
+    <span class="settings-toast-icon">&#10003;</span>
+    <span class="settings-toast-msg" id="toastMsg">保存しました</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="margin-top: 0; border-top: none;">
+        &copy; 2026 REIJI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/nav.js"></script>
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/dashboard.js"></script>
+  <script src="assets/js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+/* ========================================
+   Design Tokens - REIJI Investment SNS
+   ======================================== */
+
+:root,
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg-primary: #faf9f7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f3f1ee;
+
+  /* Primary - Amber */
+  --color-primary: #d97706;
+  --color-primary-light: #fbbf24;
+  --color-primary-dark: #b45309;
+  --color-primary-bg: rgba(217, 119, 6, 0.08);
+
+  /* Accent - Teal */
+  --color-accent: #0d9488;
+  --color-accent-light: #14b8a6;
+  --color-accent-bg: rgba(13, 148, 136, 0.08);
+
+  /* Text */
+  --text-primary: #1c1917;
+  --text-secondary: #78716c;
+  --text-tertiary: #a8a29e;
+
+  /* Borders */
+  --border-primary: #e7e5e4;
+  --border-secondary: #d6d3d1;
+
+  /* P&L Colors */
+  --color-profit: #dc2626;
+  --color-profit-bg: rgba(220, 38, 38, 0.06);
+  --color-loss: #16a34a;
+  --color-loss-bg: rgba(22, 163, 74, 0.06);
+
+  /* Day of week */
+  --color-sunday: #dc2626;
+  --color-saturday: #0d9488;
+
+  /* Category colors */
+  --cat-stock: #ef4444;
+  --cat-stock-bg: rgba(239, 68, 68, 0.1);
+  --cat-margin: #0d9488;
+  --cat-margin-bg: rgba(13, 148, 136, 0.1);
+  --cat-fx: #d97706;
+  --cat-fx-bg: rgba(217, 119, 6, 0.1);
+  --cat-crypto: #7c3aed;
+  --cat-crypto-bg: rgba(124, 58, 237, 0.1);
+  --cat-dividend: #2563eb;
+  --cat-dividend-bg: rgba(37, 99, 235, 0.1);
+
+  /* Interactive */
+  --hover-bg: #f5f3f0;
+  --focus-ring: rgba(217, 119, 6, 0.4);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(28, 25, 23, 0.04);
+  --shadow-md: 0 4px 12px rgba(28, 25, 23, 0.06);
+  --shadow-lg: 0 12px 32px rgba(28, 25, 23, 0.08);
+  --shadow-glow: 0 0 24px rgba(217, 119, 6, 0.15);
+
+  /* Overlay */
+  --overlay-bg: rgba(28, 25, 23, 0.5);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #262626;
+  --bg-tertiary: #303030;
+
+  --color-primary: #fbbf24;
+  --color-primary-light: #fcd34d;
+  --color-primary-dark: #d97706;
+  --color-primary-bg: rgba(251, 191, 36, 0.1);
+
+  --color-accent: #2dd4bf;
+  --color-accent-light: #5eead4;
+  --color-accent-bg: rgba(45, 212, 191, 0.1);
+
+  --text-primary: #fafaf9;
+  --text-secondary: #a8a29e;
+  --text-tertiary: #78716c;
+
+  --border-primary: #3a3a3a;
+  --border-secondary: #4a4a4a;
+
+  --color-profit: #f87171;
+  --color-profit-bg: rgba(248, 113, 113, 0.1);
+  --color-loss: #4ade80;
+  --color-loss-bg: rgba(74, 222, 128, 0.1);
+
+  --color-sunday: #f87171;
+  --color-saturday: #2dd4bf;
+
+  --cat-stock: #f87171;
+  --cat-stock-bg: rgba(248, 113, 113, 0.12);
+  --cat-margin: #2dd4bf;
+  --cat-margin-bg: rgba(45, 212, 191, 0.12);
+  --cat-fx: #fbbf24;
+  --cat-fx-bg: rgba(251, 191, 36, 0.12);
+  --cat-crypto: #a78bfa;
+  --cat-crypto-bg: rgba(167, 139, 250, 0.12);
+  --cat-dividend: #60a5fa;
+  --cat-dividend-bg: rgba(96, 165, 250, 0.12);
+
+  --hover-bg: #333333;
+  --focus-ring: rgba(251, 191, 36, 0.4);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 24px rgba(251, 191, 36, 0.2);
+
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+}
+
+/* Border Radius */
+:root {
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+}
+
+/* Typography */
+:root {
+  --font-sans: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+}
+
+/* Spacing */
+:root {
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+}
+
+/* Transitions */
+:root {
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
