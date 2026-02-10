@@ -47,7 +47,7 @@
       <a href="#" class="site-nav-tab">お知らせ</a>
       <a href="#" class="site-nav-tab">コミュニティ</a>
       <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
-      <a href="#" class="site-nav-tab">簡易電卓</a>
+      <a href="#" class="site-nav-tab" data-calc-open>簡易電卓</a>
       <a href="#" class="site-nav-tab">サイトの使い方</a>
       <a href="settings.html" class="site-nav-tab">ユーザー設定</a>
       <button class="site-hamburger" id="siteHamburger" aria-label="メニュー">
@@ -190,6 +190,42 @@
     </div>
   </main>
 
+  <!-- Calculator Modal -->
+  <div class="modal-overlay" id="calcModal">
+    <div class="modal-content calc-modal">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-calculator"></i> 簡易電卓</h2>
+        <button class="modal-close" id="calcClose">&times;</button>
+      </div>
+      <div class="calc-display">
+        <div class="calc-display-expr" id="calcExpr"></div>
+        <div class="calc-display-value" id="calcValue">0</div>
+      </div>
+      <div class="calc-grid">
+        <button class="calc-btn calc-btn-func" data-action="clear">AC</button>
+        <button class="calc-btn calc-btn-func" data-action="negate">&plusmn;</button>
+        <button class="calc-btn calc-btn-func" data-action="percent">%</button>
+        <button class="calc-btn calc-btn-func" data-action="backspace">&larr;</button>
+        <button class="calc-btn calc-btn-num" data-digit="7">7</button>
+        <button class="calc-btn calc-btn-num" data-digit="8">8</button>
+        <button class="calc-btn calc-btn-num" data-digit="9">9</button>
+        <button class="calc-btn calc-btn-op" data-op="÷">&divide;</button>
+        <button class="calc-btn calc-btn-num" data-digit="4">4</button>
+        <button class="calc-btn calc-btn-num" data-digit="5">5</button>
+        <button class="calc-btn calc-btn-num" data-digit="6">6</button>
+        <button class="calc-btn calc-btn-op" data-op="×">&times;</button>
+        <button class="calc-btn calc-btn-num" data-digit="1">1</button>
+        <button class="calc-btn calc-btn-num" data-digit="2">2</button>
+        <button class="calc-btn calc-btn-num" data-digit="3">3</button>
+        <button class="calc-btn calc-btn-op" data-op="-">&minus;</button>
+        <button class="calc-btn calc-btn-num calc-btn-wide" data-digit="0">0</button>
+        <button class="calc-btn calc-btn-num" data-action="decimal">.</button>
+        <button class="calc-btn calc-btn-op" data-op="+">+</button>
+        <button class="calc-btn calc-btn-eq" data-action="equals">=</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="site-footer">
     <div class="container-wide">
@@ -209,6 +245,7 @@
   <script src="assets/js/mock-data.js"></script>
   <script src="assets/js/mock-data-shared.js"></script>
   <script src="assets/js/shared-layout.js"></script>
+  <script src="assets/js/calculator.js"></script>
   <script src="assets/js/report.js"></script>
 </body>
 </html>

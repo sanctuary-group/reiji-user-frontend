@@ -517,3 +517,116 @@
     gap: var(--space-6);
   }
 }
+
+/* ---- Calculator Modal ---- */
+.calc-modal {
+  max-width: 360px;
+  padding: var(--space-5);
+}
+
+.calc-display {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-4);
+  text-align: right;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.calc-display-expr {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  min-height: 1.5em;
+  word-break: break-all;
+}
+
+.calc-display-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.calc-btn {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.calc-btn:active {
+  transform: scale(0.95);
+}
+
+.calc-btn-num {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.calc-btn-num:hover {
+  background: var(--border-primary);
+}
+
+.calc-btn-op {
+  background: var(--bg-tertiary);
+  color: var(--color-primary);
+  font-weight: var(--font-bold);
+}
+
+.calc-btn-op:hover {
+  background: var(--border-primary);
+}
+
+.calc-btn-op.active {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.calc-btn-func {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.calc-btn-func:hover {
+  background: var(--border-primary);
+}
+
+.calc-btn-eq {
+  background: var(--color-primary);
+  color: #ffffff;
+  grid-column: span 4;
+  font-size: var(--text-xl);
+}
+
+.calc-btn-eq:hover {
+  background: var(--color-primary-dark);
+}
+
+.calc-btn-wide {
+  grid-column: span 2;
+}
+
+.calc-display-value.error {
+  color: var(--color-profit);
+  font-size: var(--text-xl);
+}
