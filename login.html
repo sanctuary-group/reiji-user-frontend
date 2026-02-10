@@ -44,64 +44,107 @@
     <a href="index.html">ホーム</a>
   </div>
 
-  <!-- Login Section -->
+  <!-- Login Wizard -->
   <main class="login-page">
     <div class="login-card">
       <div class="login-header">
         <img src="assets/img/logo.svg" alt="REIJI" class="login-logo">
         <h1 class="login-title">ログイン</h1>
-        <p class="login-subtitle">アカウントにログインして、投資成績を記録しましょう。</p>
       </div>
 
-      <!-- OAuth Buttons -->
-      <div class="oauth-buttons">
-        <a href="dashboard.html" class="btn btn-block btn-oauth btn-google">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M18.17 8.37H10v3.45h4.59C14.17 13.72 12.37 15 10 15c-2.76 0-5-2.24-5-5s2.24-5 5-5c1.22 0 2.33.44 3.19 1.17l2.58-2.58C14.22 2.18 12.22 1.25 10 1.25 5.17 1.25 1.25 5.17 1.25 10S5.17 18.75 10 18.75c5 0 8.33-3.52 8.33-8.48 0-.64-.07-1.27-.17-1.9z" fill="#4285F4"/>
-            <path d="M2.63 6.12L5.59 8.3C6.33 6.4 8.02 5 10 5c1.22 0 2.33.44 3.19 1.17l2.58-2.58C14.22 2.18 12.22 1.25 10 1.25 6.95 1.25 4.29 3.26 2.63 6.12z" fill="#EA4335"/>
-            <path d="M10 18.75c2.15 0 4.1-.87 5.55-2.3l-2.73-2.15C11.97 14.98 11.05 15.37 10 15.37c-2.33 0-4.31-1.58-5.02-3.71L2.53 13.9C4.17 16.78 6.87 18.75 10 18.75z" fill="#34A853"/>
-            <path d="M18.33 8.37H10v3.45h4.59c-.38 1.17-1.18 2.13-2.22 2.77l2.73 2.15c1.6-1.47 2.57-3.65 2.57-6.37 0-.64-.07-1.27-.17-1.9z" fill="#4285F4"/>
-          </svg>
-          Googleでログイン
-        </a>
-        <a href="dashboard.html" class="btn btn-block btn-oauth btn-yahoo">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <circle cx="10" cy="10" r="10" fill="#FF0033"/>
-            <text x="5" y="15" font-size="13" font-weight="bold" fill="white">Y!</text>
-          </svg>
-          Yahoo! JAPANでログイン
-        </a>
-        <a href="dashboard.html" class="btn btn-block btn-oauth btn-x">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-          </svg>
-          Xでログイン
-        </a>
+      <!-- Progress Bar -->
+      <div class="login-progress" id="loginProgress">
+        <div class="login-progress-step active" data-step="1">
+          <span class="login-progress-num">1</span>
+          <span class="login-progress-label">メール認証</span>
+        </div>
+        <div class="login-progress-line"></div>
+        <div class="login-progress-step" data-step="2">
+          <span class="login-progress-num">2</span>
+          <span class="login-progress-label">LINE</span>
+        </div>
+        <div class="login-progress-line"></div>
+        <div class="login-progress-step" data-step="3">
+          <span class="login-progress-num">3</span>
+          <span class="login-progress-label">公式LINE</span>
+        </div>
+        <div class="login-progress-line"></div>
+        <div class="login-progress-step" data-step="4">
+          <span class="login-progress-num">4</span>
+          <span class="login-progress-label">完了</span>
+        </div>
+        <div class="login-progress-line"></div>
+        <div class="login-progress-step" data-step="5">
+          <span class="login-progress-num">5</span>
+          <span class="login-progress-label">サイトへ</span>
+        </div>
       </div>
 
-      <div class="divider">または</div>
-
-      <!-- Email/Password Form -->
-      <form class="login-form" onsubmit="event.preventDefault(); window.location.href='dashboard.html';">
-        <div class="form-group">
-          <label class="form-label" for="email">メールアドレス</label>
-          <input class="form-input" type="email" id="email" placeholder="example@email.com">
+      <!-- Step 1: メールアドレス認証 -->
+      <div class="login-step active" data-step="1">
+        <div class="login-step-header">
+          <div class="login-step-icon"><i class="fa-solid fa-envelope"></i></div>
+          <h2 class="login-step-title">メールアドレス認証</h2>
+          <p class="login-step-desc">ご利用のメールアドレスを入力してください。認証メールをお送りします。</p>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="password">パスワード</label>
-          <input class="form-input" type="password" id="password" placeholder="パスワードを入力">
-        </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg login-submit">ログイン</button>
-      </form>
+        <form class="login-form" id="emailForm">
+          <div class="form-group">
+            <label class="form-label" for="email">メールアドレス</label>
+            <input class="form-input" type="email" id="email" placeholder="example@email.com" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">認証メールを送信</button>
+        </form>
+      </div>
 
-      <div class="login-footer">
-        <a href="#">新規登録はこちら</a>
-        <a href="#">パスワードを忘れた方</a>
+      <!-- Step 2: LINEログイン -->
+      <div class="login-step" data-step="2">
+        <div class="login-step-header">
+          <div class="login-step-icon"><i class="fa-brands fa-line"></i></div>
+          <h2 class="login-step-title">LINEログイン</h2>
+          <p class="login-step-desc">LINEアカウントと連携してログインします。</p>
+        </div>
+        <button class="btn btn-block btn-lg btn-line" id="lineLoginBtn">
+          <i class="fa-brands fa-line"></i> LINEでログイン
+        </button>
+      </div>
+
+      <!-- Step 3: 公式LINE友だち追加 -->
+      <div class="login-step" data-step="3">
+        <div class="login-step-header">
+          <div class="login-step-icon"><i class="fa-solid fa-user-plus"></i></div>
+          <h2 class="login-step-title">公式LINE友だち追加</h2>
+          <p class="login-step-desc">REIJI公式LINEを友だち追加すると、最新情報やサポートを受け取れます。</p>
+        </div>
+        <button class="btn btn-block btn-lg btn-line" id="addFriendBtn">
+          <i class="fa-brands fa-line"></i> 友だち追加
+        </button>
+        <button class="btn btn-ghost btn-block login-skip" id="skipFriendBtn">スキップ</button>
+      </div>
+
+      <!-- Step 4: ログイン完了 -->
+      <div class="login-step" data-step="4">
+        <div class="login-step-header">
+          <div class="login-complete-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <h2 class="login-step-title">ログイン完了</h2>
+          <p class="login-step-desc">アカウントの設定が完了しました。REIJIをお楽しみください。</p>
+        </div>
+        <button class="btn btn-primary btn-block btn-lg" id="goStep5Btn">次へ</button>
+      </div>
+
+      <!-- Step 5: サイトに戻る -->
+      <div class="login-step" data-step="5">
+        <div class="login-step-header">
+          <div class="login-step-icon"><i class="fa-solid fa-house"></i></div>
+          <h2 class="login-step-title">準備完了</h2>
+          <p class="login-step-desc">すべての設定が完了しました。TOPページへ移動しましょう。</p>
+        </div>
+        <a href="dashboard.html" class="btn btn-primary btn-block btn-lg">TOPページへ</a>
       </div>
     </div>
   </main>
 
   <script src="assets/js/theme.js"></script>
   <script src="assets/js/nav.js"></script>
+  <script src="assets/js/login.js"></script>
 </body>
 </html>

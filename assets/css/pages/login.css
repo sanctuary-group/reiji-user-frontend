@@ -1,5 +1,5 @@
 /* ========================================
-   Login Page Styles
+   Login Page Styles - Wizard Flow
    ======================================== */
 
 .login-page {
@@ -16,7 +16,7 @@
   border-radius: var(--radius-xl);
   padding: var(--space-8);
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   box-shadow: var(--shadow-lg);
 }
 
@@ -35,98 +35,169 @@
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
   color: var(--text-primary);
+}
+
+/* ---- Progress Bar ---- */
+.login-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: var(--space-8);
+}
+
+.login-progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.login-progress-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  border: 2px solid var(--border-primary);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  transition: all var(--transition-base);
+}
+
+.login-progress-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  transition: color var(--transition-base);
+}
+
+.login-progress-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-primary);
+  min-width: 20px;
+  margin: 0 var(--space-1);
+  margin-bottom: 18px;
+  transition: background var(--transition-base);
+}
+
+/* Active step */
+.login-progress-step.active .login-progress-num {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-bg);
+}
+
+.login-progress-step.active .login-progress-label {
+  color: var(--color-primary);
+  font-weight: var(--font-semibold);
+}
+
+/* Completed step */
+.login-progress-step.completed .login-progress-num {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.login-progress-step.completed .login-progress-label {
+  color: var(--text-secondary);
+}
+
+.login-progress-line.completed {
+  background: var(--color-primary);
+}
+
+/* ---- Step Content ---- */
+.login-step {
+  display: none;
+  animation: stepFadeIn 0.3s ease;
+}
+
+.login-step.active {
+  display: block;
+}
+
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-step-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.login-step-icon {
+  font-size: 2.5rem;
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+  line-height: 1;
+}
+
+.login-step-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
   margin-bottom: var(--space-2);
 }
 
-.login-subtitle {
+.login-step-desc {
   font-size: var(--text-sm);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
 }
 
-/* ---- OAuth Buttons ---- */
-.oauth-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+/* ---- Login Form ---- */
+.login-form {
+  margin-bottom: 0;
 }
 
-.btn-oauth {
-  padding: var(--space-3) var(--space-4);
-  font-size: var(--text-sm);
+/* ---- LINE Button ---- */
+.btn-line {
+  background: #06C755;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
   font-weight: var(--font-semibold);
-  border-radius: var(--radius-md);
-  gap: var(--space-3);
+  border: none;
   transition: all var(--transition-base);
 }
 
-.btn-google {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-}
-
-.btn-google:hover {
-  background: var(--hover-bg);
-  border-color: var(--border-secondary);
-  color: var(--text-primary);
-  transform: translateY(-1px);
-}
-
-.btn-yahoo {
-  background: linear-gradient(135deg, #ff0033, #cc0029);
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(255, 0, 51, 0.25);
-}
-
-.btn-yahoo:hover {
-  box-shadow: 0 6px 24px rgba(255, 0, 51, 0.35);
+.btn-line:hover {
+  background: #05B64C;
   color: #ffffff;
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(6, 199, 85, 0.3);
 }
 
-.btn-x {
-  background: #000000;
-  color: #ffffff;
-}
-
-[data-theme="dark"] .btn-x {
-  background: #333333;
-}
-
-.btn-x:hover {
-  background: #1a1a1a;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-[data-theme="dark"] .btn-x:hover {
-  background: #444444;
-}
-
-/* ---- Login Form ---- */
-.login-form {
-  margin-bottom: var(--space-4);
-}
-
-.login-submit {
-  margin-top: var(--space-2);
-}
-
-/* ---- Footer Links ---- */
-.login-footer {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-6);
+/* ---- Skip Button ---- */
+.login-skip {
+  margin-top: var(--space-3);
+  color: var(--text-secondary);
   font-size: var(--text-sm);
 }
 
-.login-footer a {
-  color: var(--text-secondary);
-}
-
-.login-footer a:hover {
+/* ---- Complete Icon ---- */
+.login-complete-icon {
+  font-size: 4rem;
   color: var(--color-primary);
+  margin-bottom: var(--space-3);
+  line-height: 1;
 }
 
 /* ---- Responsive ---- */
@@ -140,5 +211,27 @@
   .login-card {
     padding: var(--space-6);
     border-radius: var(--radius-lg);
+  }
+
+  .login-progress-num {
+    width: 28px;
+    height: 28px;
+    font-size: var(--text-xs);
+  }
+
+  .login-progress-label {
+    font-size: 9px;
+  }
+
+  .login-progress-line {
+    min-width: 12px;
+  }
+
+  .login-step-icon {
+    font-size: 2rem;
+  }
+
+  .login-complete-icon {
+    font-size: 3rem;
   }
 }
