@@ -837,6 +837,21 @@
 
   .site-hamburger {
     display: flex;
+    position: absolute;
+    right: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-secondary);
+    z-index: 2;
+  }
+
+  .site-nav {
+    position: sticky;
+    top: 0;
+  }
+
+  .site-nav-inner {
+    padding-right: 48px;
   }
 }
 
