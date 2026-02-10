@@ -50,6 +50,13 @@
   grid-template-columns: repeat(4, 1fr);
 }
 
+.container-wide {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .container {

@@ -15,29 +15,41 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/shared-layout.css">
   <link rel="stylesheet" href="assets/css/pages/calendar.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="container nav-inner">
-      <a href="index.html" class="nav-logo">
+  <!-- Crypto Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container-wide site-header-inner">
+      <a href="dashboard.html" class="site-logo">
         <img src="assets/img/logo.svg" alt="REIJI">
-        <span class="nav-logo-text">REIJI</span>
+        <span class="site-logo-text">REIJI</span>
       </a>
-      <div class="nav-links">
-        <a href="dashboard.html">ダッシュボード</a>
-        <a href="calendar.html" class="active">カレンダー</a>
-      </div>
-      <div class="nav-datetime" id="navDatetime"></div>
-      <div class="nav-actions">
+      <div class="forex-rates" id="forexRates"></div>
+      <div class="site-header-right">
+        <div class="site-clock" id="siteClock"></div>
         <button class="theme-toggle" aria-label="テーマ切替"></button>
-        <div class="nav-user hide-mobile">
-          <div class="avatar avatar-sm"><img src="assets/img/avatars/default.svg" alt=""></div>
-          <span class="nav-user-name">投資太郎</span>
-        </div>
       </div>
-      <button class="hamburger" aria-label="メニュー">
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="site-nav">
+    <div class="container-wide site-nav-inner">
+      <a href="dashboard.html" class="site-nav-tab">TOPページ</a>
+      <a href="#" class="site-nav-tab">お知らせ</a>
+      <a href="#" class="site-nav-tab">コミュニティ</a>
+      <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
+      <a href="#" class="site-nav-tab">簡易電卓</a>
+      <a href="#" class="site-nav-tab">サイトの使い方</a>
+      <a href="settings.html" class="site-nav-tab">ユーザー設定</a>
+      <button class="site-hamburger" id="siteHamburger" aria-label="メニュー">
         <span></span>
         <span></span>
         <span></span>
@@ -45,47 +57,85 @@
     </div>
   </nav>
 
-  <div class="mobile-menu">
-    <a href="dashboard.html">ダッシュボード</a>
-    <a href="calendar.html">カレンダー</a>
-    <a href="index.html">ログアウト</a>
-  </div>
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="site-sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- Calendar Content -->
-  <main class="section">
-    <div class="container">
-      <!-- Calendar Header -->
-      <div class="cal-header">
-        <div class="cal-nav">
-          <button class="btn btn-ghost cal-nav-btn" id="prevMonth" aria-label="前月">&lt;</button>
-          <h1 class="cal-title" id="calTitle">2026年2月</h1>
-          <button class="btn btn-ghost cal-nav-btn" id="nextMonth" aria-label="次月">&gt;</button>
+  <!-- Main Body -->
+  <main class="site-body">
+    <div class="container-wide site-layout">
+
+      <!-- Left Sidebar -->
+      <aside class="site-sidebar-left" id="sidebarLeft">
+        <div id="sidebarGroups"></div>
+        <a href="#" class="sidebar-line-cta">
+          <span>&#128172;</span> レイジへ相談する
+        </a>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="site-main">
+        <!-- Calendar Header -->
+        <div class="cal-header">
+          <div class="cal-nav">
+            <button class="btn btn-ghost cal-nav-btn" id="prevMonth" aria-label="前月">&lt;</button>
+            <h1 class="cal-title" id="calTitle">2026年2月</h1>
+            <button class="btn btn-ghost cal-nav-btn" id="nextMonth" aria-label="次月">&gt;</button>
+          </div>
+          <div class="cal-summary" id="calSummary"></div>
         </div>
-        <div class="cal-summary" id="calSummary">
-          <!-- Populated by JS -->
+
+        <!-- Category Summary -->
+        <div class="cal-categories" id="calCategories"></div>
+
+        <!-- Calendar Grid -->
+        <div class="cal-grid-wrapper">
+          <div class="cal-weekdays">
+            <span class="cal-weekday sun">日</span>
+            <span class="cal-weekday">月</span>
+            <span class="cal-weekday">火</span>
+            <span class="cal-weekday">水</span>
+            <span class="cal-weekday">木</span>
+            <span class="cal-weekday">金</span>
+            <span class="cal-weekday sat">土</span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
         </div>
       </div>
 
-      <!-- Category Summary -->
-      <div class="cal-categories" id="calCategories">
-        <!-- Populated by JS -->
-      </div>
+      <!-- Right Sidebar -->
+      <aside class="site-sidebar-right" id="sidebarRight">
+        <div class="right-panel right-user">
+          <div class="avatar avatar-sm avatar-ring">
+            <img src="assets/img/avatars/default.svg" alt="">
+          </div>
+          <span class="right-user-name" id="rightUserName">投資太郎</span>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">損益サマリー</h3>
+          </div>
+          <div id="rightPnlSummary"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">仮想通貨レート</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div class="right-crypto-tabs">
+            <button class="right-crypto-tab active" data-tab="top5">TOP5</button>
+            <button class="right-crypto-tab" data-tab="trending">急上昇</button>
+          </div>
+          <div id="rightCryptoList"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">経済指標</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div id="rightIndicators"></div>
+        </div>
+      </aside>
 
-      <!-- Calendar Grid -->
-      <div class="cal-grid-wrapper">
-        <div class="cal-weekdays">
-          <span class="cal-weekday sun">日</span>
-          <span class="cal-weekday">月</span>
-          <span class="cal-weekday">火</span>
-          <span class="cal-weekday">水</span>
-          <span class="cal-weekday">木</span>
-          <span class="cal-weekday">金</span>
-          <span class="cal-weekday sat">土</span>
-        </div>
-        <div class="cal-grid" id="calGrid">
-          <!-- Populated by JS -->
-        </div>
-      </div>
     </div>
   </main>
 
@@ -96,24 +146,29 @@
         <h2 class="modal-title" id="modalTitle">2026年2月9日</h2>
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
-      <div id="modalBody">
-        <!-- Populated by JS -->
-      </div>
+      <div id="modalBody"></div>
     </div>
   </div>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-bottom" style="margin-top: 0; border-top: none;">
-        &copy; 2026 REIJI. All rights reserved.
+  <footer class="site-footer">
+    <div class="container-wide">
+      <div class="site-footer-inner">
+        <div class="site-footer-links">
+          <a href="#" class="site-footer-icon" aria-label="LINE">&#128172;</a>
+          <a href="#" class="site-footer-icon" aria-label="YouTube">&#9654;</a>
+          <a href="#">利用規約</a>
+          <a href="#">プライバシーポリシー</a>
+        </div>
+        <div class="site-footer-copy">&copy; 2026 REIJI. All rights reserved.</div>
       </div>
     </div>
   </footer>
 
   <script src="assets/js/theme.js"></script>
-  <script src="assets/js/nav.js"></script>
   <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/mock-data-shared.js"></script>
+  <script src="assets/js/shared-layout.js"></script>
   <script src="assets/js/calendar.js"></script>
 </body>
 </html>

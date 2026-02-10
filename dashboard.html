@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ダッシュボード - REIJI</title>
-  <meta name="description" content="あなたの投資成績をまとめてチェック">
+  <title>TOPページ - REIJI</title>
+  <meta name="description" content="投資情報・損益記録・仮想通貨・為替の総合ポータル">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,29 +15,41 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/utilities.css">
-  <link rel="stylesheet" href="assets/css/pages/dashboard.css">
+  <link rel="stylesheet" href="assets/css/shared-layout.css">
+  <link rel="stylesheet" href="assets/css/pages/top.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="container nav-inner">
-      <a href="index.html" class="nav-logo">
+  <!-- Crypto Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container-wide site-header-inner">
+      <a href="dashboard.html" class="site-logo">
         <img src="assets/img/logo.svg" alt="REIJI">
-        <span class="nav-logo-text">REIJI</span>
+        <span class="site-logo-text">REIJI</span>
       </a>
-      <div class="nav-links">
-        <a href="dashboard.html" class="active">ダッシュボード</a>
-        <a href="calendar.html">カレンダー</a>
-      </div>
-      <div class="nav-datetime" id="navDatetime"></div>
-      <div class="nav-actions">
+      <div class="forex-rates" id="forexRates"></div>
+      <div class="site-header-right">
+        <div class="site-clock" id="siteClock"></div>
         <button class="theme-toggle" aria-label="テーマ切替"></button>
-        <div class="nav-user hide-mobile">
-          <div class="avatar avatar-sm"><img src="assets/img/avatars/default.svg" alt=""></div>
-          <span class="nav-user-name" id="navUserName">投資太郎</span>
-        </div>
       </div>
-      <button class="hamburger" aria-label="メニュー">
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="site-nav">
+    <div class="container-wide site-nav-inner">
+      <a href="dashboard.html" class="site-nav-tab active">TOPページ</a>
+      <a href="#" class="site-nav-tab">お知らせ</a>
+      <a href="#" class="site-nav-tab">コミュニティ</a>
+      <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
+      <a href="#" class="site-nav-tab">簡易電卓</a>
+      <a href="#" class="site-nav-tab">サイトの使い方</a>
+      <a href="settings.html" class="site-nav-tab">ユーザー設定</a>
+      <button class="site-hamburger" id="siteHamburger" aria-label="メニュー">
         <span></span>
         <span></span>
         <span></span>
@@ -45,96 +57,132 @@
     </div>
   </nav>
 
-  <div class="mobile-menu">
-    <a href="dashboard.html">ダッシュボード</a>
-    <a href="calendar.html">カレンダー</a>
-    <a href="index.html">ログアウト</a>
-  </div>
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="site-sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- Dashboard Content -->
-  <main class="section">
-    <div class="container dashboard-layout">
-      <!-- Sidebar -->
-      <aside class="sidebar" id="sidebar">
-        <!-- Sidebar Profile -->
-        <div class="sidebar-profile">
-          <div class="sidebar-profile-top">
-            <div class="avatar avatar-lg avatar-ring">
-              <img src="assets/img/avatars/default.svg" alt="">
-            </div>
-            <div class="sidebar-profile-info">
-              <div class="sidebar-profile-name" id="sidebarName">投資太郎</div>
-              <span class="badge badge-primary sidebar-profile-style" id="sidebarStyle">デイトレード / 日本株</span>
-            </div>
-          </div>
-          <p class="sidebar-profile-bio" id="sidebarBio">日本株をメインにデイトレード・スイングトレードを行っています。</p>
-          <div class="sidebar-profile-metrics" id="sidebarMetrics">
-            <!-- Populated by JS -->
-          </div>
-        </div>
+  <!-- Main Body -->
+  <main class="site-body">
+    <div class="container-wide site-layout">
 
-        <!-- Sidebar Menu -->
-        <nav class="sidebar-menu">
-          <a href="dashboard.html" class="sidebar-menu-item active">
-            <span class="sidebar-menu-icon">&#127968;</span>
-            <span class="sidebar-menu-text">ダッシュボード</span>
-          </a>
-          <a href="calendar.html" class="sidebar-menu-item">
-            <span class="sidebar-menu-icon">&#128197;</span>
-            <span class="sidebar-menu-text">損益カレンダー</span>
-          </a>
-          <a href="report.html" class="sidebar-menu-item">
-            <span class="sidebar-menu-icon">&#128200;</span>
-            <span class="sidebar-menu-text">レポート</span>
-          </a>
-          <a href="#" class="sidebar-menu-item">
-            <span class="sidebar-menu-icon">&#128176;</span>
-            <span class="sidebar-menu-text">資産推移</span>
-          </a>
-          <div class="sidebar-divider"></div>
-          <a href="settings.html" class="sidebar-menu-item">
-            <span class="sidebar-menu-icon">&#9881;&#65039;</span>
-            <span class="sidebar-menu-text">設定</span>
-          </a>
-          <a href="index.html" class="sidebar-menu-item">
-            <span class="sidebar-menu-icon">&#128682;</span>
-            <span class="sidebar-menu-text">ログアウト</span>
-          </a>
-        </nav>
+      <!-- Left Sidebar -->
+      <aside class="site-sidebar-left" id="sidebarLeft">
+        <div id="sidebarGroups"></div>
+        <a href="#" class="sidebar-line-cta">
+          <span>&#128172;</span> レイジへ相談する
+        </a>
       </aside>
-      <!-- Sidebar Overlay (mobile) -->
-      <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
       <!-- Main Content -->
-      <div class="dashboard-main">
-        <!-- P&L Summary Cards -->
-        <div class="grid grid-3 pnl-cards" id="pnlCards">
-          <!-- Populated by JS -->
+      <div class="site-main">
+        <!-- Banner Slider -->
+        <section class="top-banner">
+          <div class="banner-viewport" id="bannerViewport">
+            <div class="banner-track" id="bannerTrack"></div>
+          </div>
+          <div class="banner-dots" id="bannerDots"></div>
+        </section>
+
+        <!-- お知らせ -->
+        <section class="top-section">
+          <div class="top-section-header">
+            <h2 class="top-section-title">お知らせ</h2>
+            <a href="#" class="top-section-more">すべて見る &rarr;</a>
+          </div>
+          <div class="notice-table" id="noticeTable"></div>
+        </section>
+
+        <!-- Reijiの最新動画 -->
+        <section class="top-section">
+          <div class="top-section-header">
+            <h2 class="top-section-title">Reijiの最新動画</h2>
+            <a href="#" class="top-section-more">すべて見る &rarr;</a>
+          </div>
+          <div class="video-grid" id="videoGrid"></div>
+        </section>
+
+        <!-- 仮想通貨最新ニュース -->
+        <section class="top-section">
+          <div class="top-section-header">
+            <h2 class="top-section-title">仮想通貨最新ニュース</h2>
+            <a href="#" class="top-section-more">仮想通貨情報を見る &rarr;</a>
+          </div>
+          <div class="news-list" id="cryptoNewsList"></div>
+        </section>
+
+        <!-- 為替最新ニュース -->
+        <section class="top-section">
+          <div class="top-section-header">
+            <h2 class="top-section-title">為替最新ニュース</h2>
+            <a href="#" class="top-section-more">FX情報を見る &rarr;</a>
+          </div>
+          <div class="news-list" id="forexNewsList"></div>
+        </section>
+      </div>
+
+      <!-- Right Sidebar -->
+      <aside class="site-sidebar-right" id="sidebarRight">
+        <!-- User -->
+        <div class="right-panel right-user">
+          <div class="avatar avatar-sm avatar-ring">
+            <img src="assets/img/avatars/default.svg" alt="">
+          </div>
+          <span class="right-user-name" id="rightUserName">投資太郎</span>
         </div>
 
-        <!-- Recent Activity -->
-        <div class="section-header mt-8">
-          <h2 class="section-title">最近のアクティビティ</h2>
+        <!-- P&L Summary -->
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">損益サマリー</h3>
+          </div>
+          <div id="rightPnlSummary"></div>
         </div>
-        <div class="activity-list" id="activityList">
-          <!-- Populated by JS -->
+
+        <!-- Crypto Rates -->
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">仮想通貨レート</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div class="right-crypto-tabs">
+            <button class="right-crypto-tab active" data-tab="top5">TOP5</button>
+            <button class="right-crypto-tab" data-tab="trending">急上昇</button>
+          </div>
+          <div id="rightCryptoList"></div>
         </div>
-      </div>
+
+        <!-- Economic Indicators -->
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">経済指標</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div id="rightIndicators"></div>
+        </div>
+      </aside>
+
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-bottom" style="margin-top: 0; border-top: none;">
-        &copy; 2026 REIJI. All rights reserved.
+  <footer class="site-footer">
+    <div class="container-wide">
+      <div class="site-footer-inner">
+        <div class="site-footer-links">
+          <a href="#" class="site-footer-icon" aria-label="LINE">&#128172;</a>
+          <a href="#" class="site-footer-icon" aria-label="YouTube">&#9654;</a>
+          <a href="#">利用規約</a>
+          <a href="#">プライバシーポリシー</a>
+        </div>
+        <div class="site-footer-copy">&copy; 2026 REIJI. All rights reserved.</div>
       </div>
     </div>
   </footer>
 
   <script src="assets/js/theme.js"></script>
-  <script src="assets/js/nav.js"></script>
   <script src="assets/js/mock-data.js"></script>
-  <script src="assets/js/dashboard.js"></script>
+  <script src="assets/js/mock-data-shared.js"></script>
+  <script src="assets/js/mock-data-top.js"></script>
+  <script src="assets/js/shared-layout.js"></script>
+  <script src="assets/js/top.js"></script>
 </body>
 </html>

@@ -163,6 +163,17 @@
   --space-16: 4rem;
 }
 
+/* Shared Layout Dimensions */
+:root {
+  --ticker-height: 36px;
+  --site-header-height: 56px;
+  --site-nav-height: 44px;
+  --z-ticker: 900;
+  --z-site-nav: 1000;
+  --z-sidebar-overlay: 1100;
+  --z-sidebar-mobile: 1200;
+}
+
 /* Transitions */
 :root {
   --transition-fast: 0.15s ease;

@@ -15,29 +15,41 @@
   <link rel="stylesheet" href="assets/css/layout.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/shared-layout.css">
   <link rel="stylesheet" href="assets/css/pages/report.css">
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="container nav-inner">
-      <a href="index.html" class="nav-logo">
+  <!-- Crypto Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container-wide site-header-inner">
+      <a href="dashboard.html" class="site-logo">
         <img src="assets/img/logo.svg" alt="REIJI">
-        <span class="nav-logo-text">REIJI</span>
+        <span class="site-logo-text">REIJI</span>
       </a>
-      <div class="nav-links">
-        <a href="dashboard.html">ダッシュボード</a>
-        <a href="calendar.html">カレンダー</a>
-      </div>
-      <div class="nav-datetime" id="navDatetime"></div>
-      <div class="nav-actions">
+      <div class="forex-rates" id="forexRates"></div>
+      <div class="site-header-right">
+        <div class="site-clock" id="siteClock"></div>
         <button class="theme-toggle" aria-label="テーマ切替"></button>
-        <div class="nav-user hide-mobile">
-          <div class="avatar avatar-sm"><img src="assets/img/avatars/default.svg" alt=""></div>
-          <span class="nav-user-name">投資太郎</span>
-        </div>
       </div>
-      <button class="hamburger" aria-label="メニュー">
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="site-nav">
+    <div class="container-wide site-nav-inner">
+      <a href="dashboard.html" class="site-nav-tab">TOPページ</a>
+      <a href="#" class="site-nav-tab">お知らせ</a>
+      <a href="#" class="site-nav-tab">コミュニティ</a>
+      <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
+      <a href="#" class="site-nav-tab">簡易電卓</a>
+      <a href="#" class="site-nav-tab">サイトの使い方</a>
+      <a href="settings.html" class="site-nav-tab">ユーザー設定</a>
+      <button class="site-hamburger" id="siteHamburger" aria-label="メニュー">
         <span></span>
         <span></span>
         <span></span>
@@ -45,125 +57,157 @@
     </div>
   </nav>
 
-  <div class="mobile-menu">
-    <a href="dashboard.html">ダッシュボード</a>
-    <a href="calendar.html">カレンダー</a>
-    <a href="report.html">レポート</a>
-    <a href="index.html">ログアウト</a>
-  </div>
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="site-sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- Report Content -->
-  <main class="section">
-    <div class="container">
-      <!-- Report Header -->
-      <div class="report-header">
-        <div class="report-nav">
-          <button class="btn btn-ghost report-nav-btn" id="prevPeriod" aria-label="前へ">&lt;</button>
-          <h1 class="report-title" id="reportTitle">2026年2月</h1>
-          <button class="btn btn-ghost report-nav-btn" id="nextPeriod" aria-label="次へ">&gt;</button>
-        </div>
-        <div class="report-period-tabs">
-          <button class="report-period-tab active" data-period="monthly">月間</button>
-          <button class="report-period-tab" data-period="yearly">年間</button>
-          <button class="report-period-tab" data-period="lifetime">生涯</button>
-        </div>
-      </div>
+  <!-- Main Body -->
+  <main class="site-body">
+    <div class="container-wide site-layout">
 
-      <!-- KPI Cards -->
-      <div class="grid grid-4 report-kpi-grid" id="reportKpi">
-        <!-- Populated by JS -->
-      </div>
+      <!-- Left Sidebar -->
+      <aside class="site-sidebar-left" id="sidebarLeft">
+        <div id="sidebarGroups"></div>
+        <a href="#" class="sidebar-line-cta">
+          <span>&#128172;</span> レイジへ相談する
+        </a>
+      </aside>
 
-      <!-- Chart -->
-      <div class="report-section">
-        <div class="report-section-header">
-          <h2 class="report-section-title" id="chartTitle">日次損益推移</h2>
-        </div>
-        <div class="report-chart-card">
-          <div class="report-chart" id="reportChart">
-            <!-- Populated by JS -->
+      <!-- Main Content -->
+      <div class="site-main">
+        <!-- Report Header -->
+        <div class="report-header">
+          <div class="report-nav">
+            <button class="btn btn-ghost report-nav-btn" id="prevPeriod" aria-label="前へ">&lt;</button>
+            <h1 class="report-title" id="reportTitle">2026年2月</h1>
+            <button class="btn btn-ghost report-nav-btn" id="nextPeriod" aria-label="次へ">&gt;</button>
+          </div>
+          <div class="report-period-tabs">
+            <button class="report-period-tab active" data-period="monthly">月間</button>
+            <button class="report-period-tab" data-period="yearly">年間</button>
+            <button class="report-period-tab" data-period="lifetime">生涯</button>
           </div>
         </div>
-      </div>
 
-      <!-- Two-column: Category Breakdown + Summary -->
-      <div class="grid grid-2 report-detail-grid">
-        <!-- Category Breakdown -->
+        <!-- KPI Cards -->
+        <div class="grid grid-4 report-kpi-grid" id="reportKpi"></div>
+
+        <!-- Chart -->
         <div class="report-section">
           <div class="report-section-header">
-            <h2 class="report-section-title">カテゴリ別内訳</h2>
+            <h2 class="report-section-title" id="chartTitle">日次損益推移</h2>
           </div>
-          <div class="report-card">
-            <div id="categoryBreakdown">
-              <!-- Populated by JS -->
+          <div class="report-chart-card">
+            <div class="report-chart" id="reportChart"></div>
+          </div>
+        </div>
+
+        <!-- Two-column: Category Breakdown + Summary -->
+        <div class="grid grid-2 report-detail-grid">
+          <div class="report-section">
+            <div class="report-section-header">
+              <h2 class="report-section-title">カテゴリ別内訳</h2>
+            </div>
+            <div class="report-card">
+              <div id="categoryBreakdown"></div>
+            </div>
+          </div>
+          <div class="report-section" id="summarySection">
+            <div class="report-section-header">
+              <h2 class="report-section-title" id="summaryTitle">週別サマリー</h2>
+            </div>
+            <div class="report-card">
+              <div id="reportSummary"></div>
             </div>
           </div>
         </div>
 
-        <!-- Summary (weekly / quarterly / yearly) -->
-        <div class="report-section" id="summarySection">
+        <!-- Best / Worst -->
+        <div class="grid grid-2 report-detail-grid">
+          <div class="report-section">
+            <div class="report-section-header">
+              <h2 class="report-section-title" id="bestTitle">ベスト3</h2>
+            </div>
+            <div class="report-card">
+              <div id="bestItems"></div>
+            </div>
+          </div>
+          <div class="report-section">
+            <div class="report-section-header">
+              <h2 class="report-section-title" id="worstTitle">ワースト3</h2>
+            </div>
+            <div class="report-card">
+              <div id="worstItems"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Goal Progress -->
+        <div class="report-section" id="goalSection">
           <div class="report-section-header">
-            <h2 class="report-section-title" id="summaryTitle">週別サマリー</h2>
+            <h2 class="report-section-title" id="goalTitle">年間目標への進捗</h2>
           </div>
           <div class="report-card">
-            <div id="reportSummary">
-              <!-- Populated by JS -->
-            </div>
+            <div id="goalProgress"></div>
           </div>
         </div>
       </div>
 
-      <!-- Best / Worst -->
-      <div class="grid grid-2 report-detail-grid">
-        <div class="report-section">
-          <div class="report-section-header">
-            <h2 class="report-section-title" id="bestTitle">ベスト3</h2>
+      <!-- Right Sidebar -->
+      <aside class="site-sidebar-right" id="sidebarRight">
+        <div class="right-panel right-user">
+          <div class="avatar avatar-sm avatar-ring">
+            <img src="assets/img/avatars/default.svg" alt="">
           </div>
-          <div class="report-card">
-            <div id="bestItems">
-              <!-- Populated by JS -->
-            </div>
-          </div>
+          <span class="right-user-name" id="rightUserName">投資太郎</span>
         </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">損益サマリー</h3>
+          </div>
+          <div id="rightPnlSummary"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">仮想通貨レート</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div class="right-crypto-tabs">
+            <button class="right-crypto-tab active" data-tab="top5">TOP5</button>
+            <button class="right-crypto-tab" data-tab="trending">急上昇</button>
+          </div>
+          <div id="rightCryptoList"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">経済指標</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div id="rightIndicators"></div>
+        </div>
+      </aside>
 
-        <div class="report-section">
-          <div class="report-section-header">
-            <h2 class="report-section-title" id="worstTitle">ワースト3</h2>
-          </div>
-          <div class="report-card">
-            <div id="worstItems">
-              <!-- Populated by JS -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Goal Progress -->
-      <div class="report-section" id="goalSection">
-        <div class="report-section-header">
-          <h2 class="report-section-title" id="goalTitle">年間目標への進捗</h2>
-        </div>
-        <div class="report-card">
-          <div id="goalProgress">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-      </div>
     </div>
   </main>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-bottom" style="margin-top: 0; border-top: none;">
-        &copy; 2026 REIJI. All rights reserved.
+  <footer class="site-footer">
+    <div class="container-wide">
+      <div class="site-footer-inner">
+        <div class="site-footer-links">
+          <a href="#" class="site-footer-icon" aria-label="LINE">&#128172;</a>
+          <a href="#" class="site-footer-icon" aria-label="YouTube">&#9654;</a>
+          <a href="#">利用規約</a>
+          <a href="#">プライバシーポリシー</a>
+        </div>
+        <div class="site-footer-copy">&copy; 2026 REIJI. All rights reserved.</div>
       </div>
     </div>
   </footer>
 
   <script src="assets/js/theme.js"></script>
-  <script src="assets/js/nav.js"></script>
   <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/mock-data-shared.js"></script>
+  <script src="assets/js/shared-layout.js"></script>
   <script src="assets/js/report.js"></script>
 </body>
 </html>
