@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>損益グラフ - REIJI</title>
+  <meta name="description" content="累計損益の推移をグラフで確認">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/shared-layout.css">
+  <link rel="stylesheet" href="assets/css/pages/graph.css">
+</head>
+<body>
+  <!-- Crypto Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container-wide site-header-inner">
+      <a href="dashboard.html" class="site-logo">
+        <img src="assets/img/logo.svg" alt="REIJI">
+        <span class="site-logo-text">REIJI</span>
+      </a>
+      <div class="forex-rates" id="forexRates"></div>
+      <div class="site-header-right">
+        <div class="site-clock" id="siteClock"></div>
+        <button class="theme-toggle" aria-label="テーマ切替"></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="site-nav">
+    <div class="container-wide site-nav-inner">
+      <a href="dashboard.html" class="site-nav-tab">TOPページ</a>
+      <a href="#" class="site-nav-tab">お知らせ</a>
+      <a href="#" class="site-nav-tab">コミュニティ</a>
+      <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
+      <a href="#" class="site-nav-tab">簡易電卓</a>
+      <a href="#" class="site-nav-tab">サイトの使い方</a>
+      <a href="settings.html" class="site-nav-tab">ユーザー設定</a>
+      <button class="site-hamburger" id="siteHamburger" aria-label="メニュー">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="site-sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main Body -->
+  <main class="site-body">
+    <div class="container-wide site-layout">
+
+      <!-- Left Sidebar -->
+      <aside class="site-sidebar-left" id="sidebarLeft">
+        <div id="sidebarGroups"></div>
+        <a href="#" class="sidebar-line-cta">
+          <i class="fa-brands fa-line"></i> レイジへ相談する
+        </a>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="site-main">
+        <!-- Graph Header -->
+        <div class="graph-header">
+          <div class="graph-nav">
+            <button class="btn btn-ghost graph-nav-btn" id="prevPeriod" aria-label="前へ">&lt;</button>
+            <h1 class="graph-title" id="graphTitle">2026年2月</h1>
+            <button class="btn btn-ghost graph-nav-btn" id="nextPeriod" aria-label="次へ">&gt;</button>
+          </div>
+          <div class="graph-period-tabs">
+            <button class="graph-period-tab active" data-period="monthly">月間</button>
+            <button class="graph-period-tab" data-period="yearly">年間</button>
+            <button class="graph-period-tab" data-period="lifetime">生涯</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-4 graph-kpi-grid" id="graphKpi"></div>
+
+        <!-- Line Chart -->
+        <div class="graph-section">
+          <div class="graph-section-header">
+            <h2 class="graph-section-title" id="chartTitle">累計損益推移</h2>
+          </div>
+          <div class="graph-chart-card">
+            <div class="graph-chart" id="graphChart"></div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="graph-section">
+          <div class="graph-section-header">
+            <h2 class="graph-section-title" id="tableTitle">損益データ</h2>
+          </div>
+          <div class="graph-card">
+            <div id="graphTable"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <aside class="site-sidebar-right" id="sidebarRight">
+        <div class="right-panel right-user">
+          <div class="avatar avatar-sm avatar-ring">
+            <img src="assets/img/avatars/default.svg" alt="">
+          </div>
+          <span class="right-user-name" id="rightUserName">投資太郎</span>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">損益サマリー</h3>
+          </div>
+          <div id="rightPnlSummary"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">仮想通貨レート</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div class="right-crypto-tabs">
+            <button class="right-crypto-tab active" data-tab="top5">TOP5</button>
+            <button class="right-crypto-tab" data-tab="trending">急上昇</button>
+          </div>
+          <div id="rightCryptoList"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">経済指標</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div id="rightIndicators"></div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container-wide">
+      <div class="site-footer-inner">
+        <div class="site-footer-links">
+          <a href="#" class="site-footer-icon" aria-label="LINE"><i class="fa-brands fa-line"></i></a>
+          <a href="#" class="site-footer-icon" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#">利用規約</a>
+          <a href="#">プライバシーポリシー</a>
+        </div>
+        <div class="site-footer-copy">&copy; 2026 REIJI. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/mock-data-shared.js"></script>
+  <script src="assets/js/shared-layout.js"></script>
+  <script src="assets/js/graph.js"></script>
+</body>
+</html>
