@@ -103,7 +103,7 @@
       html += '<button class="sidebar-group-header">' +
         '<span class="sidebar-group-icon">' + group.icon + '</span>' +
         '<span class="sidebar-group-label">' + group.label + '</span>' +
-        '<span class="sidebar-group-chevron">&#9654;</span>' +
+        '<span class="sidebar-group-chevron"><i class="fa-solid fa-chevron-right"></i></span>' +
       '</button>';
       html += '<div class="sidebar-group-children">';
       for (var j = 0; j < group.items.length; j++) {
@@ -169,6 +169,27 @@
     if (nameEl && typeof MOCK_USER !== 'undefined') {
       nameEl.textContent = MOCK_USER.name;
     }
+
+    var userPanel = document.querySelector('.right-user');
+    if (!userPanel) return;
+
+    // Add dropdown
+    var dropdown = document.createElement('div');
+    dropdown.className = 'right-user-dropdown';
+    dropdown.innerHTML = '<a href="index.html" class="right-user-dropdown-item">' +
+      '<i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>';
+    userPanel.appendChild(dropdown);
+
+    // Toggle on click
+    userPanel.addEventListener('click', function (e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+
+    // Close on outside click
+    document.addEventListener('click', function () {
+      dropdown.classList.remove('open');
+    });
   }
 
   // ---- Right Sidebar: P&L Summary ----
@@ -189,7 +210,7 @@
       html += '<a href="' + item.href + '" class="right-pnl-item">' +
         '<span class="right-pnl-label">' + item.label + '</span>' +
         '<span class="right-pnl-value ' + valueClass + '">' + formatYen(item.value) + '</span>' +
-        '<span class="right-pnl-arrow">&#8250;</span>' +
+        '<span class="right-pnl-arrow"><i class="fa-solid fa-chevron-right"></i></span>' +
       '</a>';
     }
     container.innerHTML = html;

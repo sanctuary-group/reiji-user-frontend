@@ -115,8 +115,8 @@
         '<span class="settings-cat-name">' + cat.name + '</span>' +
         '<span class="settings-cat-id">' + cat.id + '</span>' +
         '<div class="settings-cat-actions">' +
-          '<button class="settings-cat-btn edit" title="編集" data-id="' + cat.id + '">&#9998;</button>' +
-          '<button class="settings-cat-btn delete" title="削除" data-id="' + cat.id + '">&times;</button>' +
+          '<button class="settings-cat-btn edit" title="編集" data-id="' + cat.id + '"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="settings-cat-btn delete" title="削除" data-id="' + cat.id + '"><i class="fa-solid fa-xmark"></i></button>' +
         '</div>' +
       '</div>';
     }

@@ -124,6 +124,7 @@
 .report-kpi-icon {
   font-size: 1.5rem;
   margin-bottom: var(--space-2);
+  color: var(--color-primary);
 }
 
 .report-kpi-value {

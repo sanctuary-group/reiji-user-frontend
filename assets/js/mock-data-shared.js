@@ -25,7 +25,7 @@ var MOCK_FOREX_RATES = [
 var MOCK_SIDEBAR_LINKS = [
   {
     label: '損益記録',
-    icon: '&#128200;',
+    icon: '<i class="fa-solid fa-chart-column"></i>',
     items: [
       { label: 'カレンダー', href: 'calendar.html' },
       { label: '月間損益', href: 'report.html', period: 'monthly' },
@@ -37,14 +37,14 @@ var MOCK_SIDEBAR_LINKS = [
   },
   {
     label: 'シミュレーション',
-    icon: '&#128736;',
+    icon: '<i class="fa-solid fa-calculator"></i>',
     items: [
       { label: '税金計算ツール', href: '#' }
     ]
   },
   {
     label: '有益動画まとめ',
-    icon: '&#127909;',
+    icon: '<i class="fa-solid fa-video"></i>',
     items: [
       { label: 'YouTube', href: '#' },
       { label: '限定配信', href: '#' }
@@ -52,7 +52,7 @@ var MOCK_SIDEBAR_LINKS = [
   },
   {
     label: '有益サイト一覧',
-    icon: '&#127760;',
+    icon: '<i class="fa-solid fa-globe"></i>',
     items: [
       { label: 'レイジの有益情報局', href: '#' },
       { label: '投資総合情報', href: '#' },

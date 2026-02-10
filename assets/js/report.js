@@ -197,10 +197,10 @@
     if (!container) return;
 
     var kpis = [
-      { icon: '&#128176;', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '月間損益合計', sub: '勝ち ' + stats.winDays + '日 / 負け ' + stats.lossDays + '日' },
-      { icon: '&#127919;', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
-      { icon: '&#128200;', value: formatYen(stats.avgPnl), cls: stats.avgPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均日次損益', sub: '取引日数 ' + stats.tradeDays + '日' },
-      { icon: '&#9889;', value: formatYen(stats.maxWin), cls: 'text-profit', label: '最大利益（1日）', sub: '最大損失: ' + formatYen(stats.maxLoss) }
+      { icon: '<i class="fa-solid fa-sack-dollar"></i>', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '月間損益合計', sub: '勝ち ' + stats.winDays + '日 / 負け ' + stats.lossDays + '日' },
+      { icon: '<i class="fa-solid fa-bullseye"></i>', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
+      { icon: '<i class="fa-solid fa-chart-column"></i>', value: formatYen(stats.avgPnl), cls: stats.avgPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均日次損益', sub: '取引日数 ' + stats.tradeDays + '日' },
+      { icon: '<i class="fa-solid fa-bolt"></i>', value: formatYen(stats.maxWin), cls: 'text-profit', label: '最大利益（1日）', sub: '最大損失: ' + formatYen(stats.maxLoss) }
     ];
 
     renderKpiCards(container, kpis);
@@ -444,10 +444,10 @@
     if (!container) return;
 
     var kpis = [
-      { icon: '&#128176;', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '年間損益合計', sub: '黒字 ' + stats.winMonths + '月 / 赤字 ' + stats.lossMonths + '月' },
-      { icon: '&#127919;', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率（日）', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
-      { icon: '&#128200;', value: formatYen(stats.avgMonthPnl), cls: stats.avgMonthPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均月間損益', sub: '取引月数 ' + stats.activeMonths + '月' },
-      { icon: '&#9889;', value: formatYen(stats.maxWin), cls: 'text-profit', label: '最大利益（1月）', sub: '最大損失: ' + formatYen(stats.maxLoss) }
+      { icon: '<i class="fa-solid fa-sack-dollar"></i>', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '年間損益合計', sub: '黒字 ' + stats.winMonths + '月 / 赤字 ' + stats.lossMonths + '月' },
+      { icon: '<i class="fa-solid fa-bullseye"></i>', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率（日）', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
+      { icon: '<i class="fa-solid fa-chart-column"></i>', value: formatYen(stats.avgMonthPnl), cls: stats.avgMonthPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均月間損益', sub: '取引月数 ' + stats.activeMonths + '月' },
+      { icon: '<i class="fa-solid fa-bolt"></i>', value: formatYen(stats.maxWin), cls: 'text-profit', label: '最大利益（1月）', sub: '最大損失: ' + formatYen(stats.maxLoss) }
     ];
 
     renderKpiCards(container, kpis);
@@ -643,10 +643,10 @@
     var lossMonths = stats.monthlyEntries.filter(function (e) { return e.total < 0; }).length;
 
     var kpis = [
-      { icon: '&#128176;', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '生涯損益合計', sub: stats.activeMonths + 'ヶ月間の記録' },
-      { icon: '&#127919;', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率（日）', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
-      { icon: '&#128200;', value: formatYen(stats.avgMonthPnl), cls: stats.avgMonthPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均月間損益', sub: '黒字月 ' + winMonths + ' / 赤字月 ' + lossMonths },
-      { icon: '&#9889;', value: stats.tradeDays + '日', cls: '', label: '総取引日数', sub: stats.activeMonths + 'ヶ月' }
+      { icon: '<i class="fa-solid fa-sack-dollar"></i>', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '生涯損益合計', sub: stats.activeMonths + 'ヶ月間の記録' },
+      { icon: '<i class="fa-solid fa-bullseye"></i>', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率（日）', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
+      { icon: '<i class="fa-solid fa-chart-column"></i>', value: formatYen(stats.avgMonthPnl), cls: stats.avgMonthPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均月間損益', sub: '黒字月 ' + winMonths + ' / 赤字月 ' + lossMonths },
+      { icon: '<i class="fa-solid fa-bolt"></i>', value: stats.tradeDays + '日', cls: '', label: '総取引日数', sub: stats.activeMonths + 'ヶ月' }
     ];
 
     renderKpiCards(container, kpis);

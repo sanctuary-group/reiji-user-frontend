@@ -164,6 +164,7 @@
   font-size: 2rem;
   margin-bottom: var(--space-3);
   line-height: 1;
+  color: var(--color-primary);
 }
 
 .feature-title {
