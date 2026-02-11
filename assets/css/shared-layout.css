@@ -838,9 +838,11 @@
   .site-hamburger {
     display: flex;
     position: absolute;
-    right: var(--space-3);
-    top: 50%;
-    transform: translateY(-50%);
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 0 var(--space-3);
+    justify-content: center;
     background: var(--bg-secondary);
     z-index: 2;
   }
