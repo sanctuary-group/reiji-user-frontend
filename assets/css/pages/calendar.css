@@ -306,6 +306,129 @@
   font-size: var(--text-sm);
 }
 
+/* ---- View Mode Button ---- */
+.modal-view-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+.modal-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-5);
+}
+
+/* ---- Edit Mode ---- */
+.modal-edit-section {
+  margin-bottom: var(--space-4);
+}
+
+.modal-edit-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+.modal-edit-cats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.modal-edit-cat-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.modal-edit-cat-row:hover {
+  background: var(--bg-tertiary);
+}
+
+.modal-edit-check {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.modal-edit-cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.modal-edit-cat-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+  min-width: 72px;
+}
+
+.modal-edit-amount {
+  width: 120px;
+  padding: var(--space-2) var(--space-3);
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}
+
+.modal-edit-amount:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.modal-edit-unit {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.modal-edit-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-top: 2px solid var(--border-primary);
+}
+
+.modal-edit-total-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+}
+
+.modal-edit-total-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+}
+
+.modal-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.modal-edit-actions .btn {
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .nav-datetime {

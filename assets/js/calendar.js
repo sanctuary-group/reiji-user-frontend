@@ -1,9 +1,10 @@
 /**
- * Calendar - Render, navigation, and day detail modal
+ * Calendar - Render, navigation, and day detail modal (view/edit)
  */
 (function () {
   var currentYear = 2026;
   var currentMonth = 2; // 1-indexed
+  var modalDay = null;  // currently open day number
 
   document.addEventListener('DOMContentLoaded', function () {
     startClock();
@@ -165,14 +166,35 @@
     });
   }
 
+  /* ---- Modal ---- */
+
   function openModal(day, dayData) {
+    modalDay = day;
     var title = currentYear + '年' + currentMonth + '月' + day + '日';
     document.getElementById('modalTitle').textContent = title;
+    showViewMode(day, dayData);
+    document.getElementById('dayModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
 
+  function closeModal() {
+    document.getElementById('dayModal').classList.remove('open');
+    document.body.style.overflow = '';
+    modalDay = null;
+  }
+
+  /* ---- View Mode ---- */
+
+  function showViewMode(day, dayData) {
     var bodyHtml = '';
 
     if (!dayData) {
-      bodyHtml = '<div class="modal-no-data">この日の記録はありません</div>';
+      bodyHtml = '<div class="modal-no-data">この日の記録はありません</div>' +
+        '<div class="modal-view-btn-wrap">' +
+          '<button class="btn btn-primary modal-view-btn" id="modalEditBtn">' +
+            '<i class="fa-solid fa-plus"></i> 記録を追加' +
+          '</button>' +
+        '</div>';
     } else {
       // Total
       var totalClass = dayData.total >= 0 ? 'text-profit' : 'text-loss';
@@ -204,15 +226,161 @@
           dayData.comment +
         '</div>';
       }
+
+      // Edit button
+      bodyHtml += '<div class="modal-view-btn-wrap">' +
+        '<button class="btn btn-secondary modal-view-btn" id="modalEditBtn">' +
+          '<i class="fa-solid fa-pen"></i> 編集' +
+        '</button>' +
+      '</div>';
     }
 
     document.getElementById('modalBody').innerHTML = bodyHtml;
-    document.getElementById('dayModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
+
+    // Bind edit button
+    document.getElementById('modalEditBtn').addEventListener('click', function () {
+      showEditMode(day, dayData);
+    });
   }
 
-  function closeModal() {
-    document.getElementById('dayModal').classList.remove('open');
-    document.body.style.overflow = '';
+  /* ---- Edit Mode ---- */
+
+  function showEditMode(day, dayData) {
+    // Build lookup of existing category amounts
+    var existingAmounts = {};
+    if (dayData) {
+      for (var i = 0; i < dayData.categories.length; i++) {
+        existingAmounts[dayData.categories[i].id] = dayData.categories[i].amount;
+      }
+    }
+
+    var html = '<div class="modal-edit-section">' +
+      '<div class="modal-edit-label">カテゴリを選択:</div>' +
+      '<div class="modal-edit-cats">';
+
+    for (var c = 0; c < MOCK_CATEGORIES.length; c++) {
+      var mc = MOCK_CATEGORIES[c];
+      var hasData = existingAmounts.hasOwnProperty(mc.id);
+      var amount = hasData ? existingAmounts[mc.id] : '';
+      var checked = hasData ? ' checked' : '';
+      var disabled = hasData ? '' : ' disabled';
+
+      html += '<label class="modal-edit-cat-row">' +
+        '<input type="checkbox" class="modal-edit-check" data-cat="' + mc.id + '"' + checked + '>' +
+        '<span class="modal-edit-cat-dot" style="background: var(--' + mc.colorVar + ');"></span>' +
+        '<span class="modal-edit-cat-name">' + mc.name + '</span>' +
+        '<input type="number" class="form-input modal-edit-amount" data-cat="' + mc.id + '"' +
+          ' placeholder="0" value="' + (hasData ? amount : '') + '"' + disabled + '>' +
+        '<span class="modal-edit-unit">円</span>' +
+      '</label>';
+    }
+
+    html += '</div>' +
+      '<div class="modal-edit-total">' +
+        '<span class="modal-edit-total-label">合計</span>' +
+        '<span class="modal-edit-total-value" id="editTotal">' + formatYen(dayData ? dayData.total : 0) + '</span>' +
+      '</div>' +
+    '</div>';
+
+    // Action buttons
+    html += '<div class="modal-edit-actions">' +
+      '<button class="btn btn-secondary" id="editCancel">キャンセル</button>' +
+      '<button class="btn btn-primary" id="editSave">保存する</button>' +
+    '</div>';
+
+    document.getElementById('modalBody').innerHTML = html;
+
+    // Bind checkbox toggle
+    var checks = document.querySelectorAll('.modal-edit-check');
+    var amounts = document.querySelectorAll('.modal-edit-amount');
+
+    checks.forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        var catId = this.getAttribute('data-cat');
+        var input = document.querySelector('.modal-edit-amount[data-cat="' + catId + '"]');
+        if (this.checked) {
+          input.disabled = false;
+          input.focus();
+        } else {
+          input.disabled = true;
+          input.value = '';
+        }
+        updateEditTotal();
+      });
+    });
+
+    amounts.forEach(function (input) {
+      input.addEventListener('input', function () {
+        updateEditTotal();
+      });
+    });
+
+    // Cancel
+    document.getElementById('editCancel').addEventListener('click', function () {
+      var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
+      var data = MOCK_CALENDAR[key] || {};
+      showViewMode(day, data[day]);
+    });
+
+    // Save
+    document.getElementById('editSave').addEventListener('click', function () {
+      saveEntry(day);
+    });
+  }
+
+  function updateEditTotal() {
+    var total = 0;
+    var checks = document.querySelectorAll('.modal-edit-check');
+    checks.forEach(function (cb) {
+      if (!cb.checked) return;
+      var catId = cb.getAttribute('data-cat');
+      var input = document.querySelector('.modal-edit-amount[data-cat="' + catId + '"]');
+      var val = parseFloat(input.value);
+      if (!isNaN(val)) total += val;
+    });
+
+    var el = document.getElementById('editTotal');
+    var cls = total >= 0 ? 'text-profit' : 'text-loss';
+    el.className = 'modal-edit-total-value ' + cls;
+    el.textContent = formatYen(total);
+  }
+
+  function saveEntry(day) {
+    var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
+    if (!MOCK_CALENDAR[key]) MOCK_CALENDAR[key] = {};
+
+    var categories = [];
+    var total = 0;
+    var checks = document.querySelectorAll('.modal-edit-check');
+
+    checks.forEach(function (cb) {
+      if (!cb.checked) return;
+      var catId = cb.getAttribute('data-cat');
+      var input = document.querySelector('.modal-edit-amount[data-cat="' + catId + '"]');
+      var val = parseFloat(input.value) || 0;
+      categories.push({ id: catId, amount: val });
+      total += val;
+    });
+
+    if (categories.length === 0) {
+      // No categories selected — remove entry
+      delete MOCK_CALENDAR[key][day];
+    } else {
+      // Preserve existing comment if any
+      var existing = MOCK_CALENDAR[key][day];
+      var comment = existing ? existing.comment : '';
+      MOCK_CALENDAR[key][day] = {
+        total: total,
+        categories: categories,
+        comment: comment
+      };
+    }
+
+    // Re-render calendar grid
+    renderCalendar();
+
+    // Show updated view mode
+    var data = MOCK_CALENDAR[key] || {};
+    showViewMode(day, data[day]);
   }
 })();
