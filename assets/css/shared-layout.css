@@ -21,7 +21,7 @@
 }
 
 .ticker-track:hover {
-  animation-play-state: paused;
+  animation-play-state: running;
 }
 
 .ticker-item {
