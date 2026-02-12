@@ -175,3 +175,47 @@ function getCategoryById(id) {
   }
   return null;
 }
+
+/**
+ * Deposit / Withdrawal data
+ */
+var MOCK_ACCOUNTS = [
+  { id: 'sbi', name: 'SBI証券' },
+  { id: 'rakuten', name: '楽天証券' },
+  { id: 'matsui', name: '松井証券' },
+  { id: 'bitflyer', name: 'bitFlyer' },
+  { id: 'mufg', name: '三菱UFJ銀行' }
+];
+
+var MOCK_METHODS = [
+  { id: 'transfer', name: '振込' },
+  { id: 'atm', name: 'ATM' },
+  { id: 'auto', name: '自動振替' },
+  { id: 'internal', name: '口座間振替' },
+  { id: 'other', name: 'その他' }
+];
+
+var MOCK_DEPOSITS = [
+  { id: 1,  date: '2025-10-03', type: 'deposit',    amount: 500000,  account: 'sbi',      method: 'transfer', memo: '初回入金' },
+  { id: 2,  date: '2025-10-15', type: 'deposit',    amount: 200000,  account: 'rakuten',   method: 'transfer', memo: '追加入金' },
+  { id: 3,  date: '2025-10-28', type: 'withdrawal', amount: 100000,  account: 'sbi',       method: 'atm',      memo: '生活費' },
+  { id: 4,  date: '2025-11-05', type: 'deposit',    amount: 300000,  account: 'sbi',       method: 'transfer', memo: '給与から' },
+  { id: 5,  date: '2025-11-12', type: 'deposit',    amount: 150000,  account: 'bitflyer',  method: 'transfer', memo: '仮想通貨用' },
+  { id: 6,  date: '2025-11-20', type: 'withdrawal', amount: 50000,   account: 'rakuten',   method: 'transfer', memo: '' },
+  { id: 7,  date: '2025-11-28', type: 'deposit',    amount: 100000,  account: 'matsui',    method: 'auto',     memo: '自動積立' },
+  { id: 8,  date: '2025-12-01', type: 'deposit',    amount: 500000,  account: 'sbi',       method: 'transfer', memo: 'ボーナス入金' },
+  { id: 9,  date: '2025-12-10', type: 'withdrawal', amount: 200000,  account: 'sbi',       method: 'atm',      memo: '年末用' },
+  { id: 10, date: '2025-12-15', type: 'deposit',    amount: 100000,  account: 'bitflyer',  method: 'transfer', memo: '' },
+  { id: 11, date: '2025-12-22', type: 'deposit',    amount: 200000,  account: 'rakuten',   method: 'transfer', memo: '' },
+  { id: 12, date: '2025-12-28', type: 'withdrawal', amount: 80000,   account: 'matsui',    method: 'transfer', memo: '' },
+  { id: 13, date: '2026-01-05', type: 'deposit',    amount: 300000,  account: 'sbi',       method: 'transfer', memo: '新年入金' },
+  { id: 14, date: '2026-01-10', type: 'deposit',    amount: 200000,  account: 'rakuten',   method: 'auto',     memo: '自動積立' },
+  { id: 15, date: '2026-01-15', type: 'withdrawal', amount: 150000,  account: 'sbi',       method: 'atm',      memo: '確定申告準備' },
+  { id: 16, date: '2026-01-22', type: 'deposit',    amount: 100000,  account: 'bitflyer',  method: 'transfer', memo: '' },
+  { id: 17, date: '2026-01-28', type: 'deposit',    amount: 100000,  account: 'matsui',    method: 'auto',     memo: '自動積立' },
+  { id: 18, date: '2026-02-03', type: 'deposit',    amount: 300000,  account: 'sbi',       method: 'transfer', memo: '給与から' },
+  { id: 19, date: '2026-02-05', type: 'deposit',    amount: 150000,  account: 'rakuten',   method: 'transfer', memo: '' },
+  { id: 20, date: '2026-02-07', type: 'withdrawal', amount: 100000,  account: 'sbi',       method: 'atm',      memo: '生活費' },
+  { id: 21, date: '2026-02-10', type: 'deposit',    amount: 200000,  account: 'bitflyer',  method: 'transfer', memo: 'ETH購入用' },
+  { id: 22, date: '2026-02-12', type: 'deposit',    amount: 100000,  account: 'matsui',    method: 'auto',     memo: '自動積立' }
+];

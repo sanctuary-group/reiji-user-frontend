@@ -1,0 +1,317 @@
+/* ========================================
+   Deposit (口座入出金管理) Page Styles
+   ======================================== */
+
+/* ---- Header ---- */
+.dep-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.dep-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dep-nav-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+}
+
+.dep-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  min-width: 120px;
+  text-align: center;
+}
+
+.dep-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---- KPI Cards ---- */
+.dep-kpi-grid {
+  margin-bottom: var(--space-6);
+}
+
+.dep-kpi {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.dep-kpi::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--color-primary);
+}
+
+.dep-kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dep-kpi-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-2);
+  color: var(--color-primary);
+}
+
+.dep-kpi-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.dep-kpi-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+}
+
+.dep-kpi-sub {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+}
+
+/* ---- Table ---- */
+.dep-table-wrapper {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.dep-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.dep-th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-primary);
+  white-space: nowrap;
+}
+
+.dep-th-amount {
+  text-align: right;
+}
+
+.dep-td {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-primary);
+  white-space: nowrap;
+}
+
+.dep-tr:last-child .dep-td {
+  border-bottom: none;
+}
+
+.dep-tr:hover .dep-td {
+  background: var(--hover-bg);
+}
+
+.dep-td-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.dep-td-amount {
+  font-family: var(--font-mono);
+  font-weight: var(--font-bold);
+  text-align: right;
+}
+
+.dep-td-memo {
+  color: var(--text-tertiary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- Type Badges ---- */
+.dep-badge-deposit {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-full);
+  background: var(--color-profit-bg);
+  color: var(--color-profit);
+}
+
+.dep-badge-withdrawal {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  border-radius: var(--radius-full);
+  background: var(--color-loss-bg);
+  color: var(--color-loss);
+}
+
+/* ---- Empty State ---- */
+.dep-table-empty {
+  display: none;
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.dep-table-empty.visible {
+  display: block;
+}
+
+/* ---- Modal Form ---- */
+.dep-modal-content {
+  max-width: 480px;
+}
+
+.dep-form .form-group {
+  margin-bottom: var(--space-4);
+}
+
+.dep-type-toggle {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+
+.dep-type-btn {
+  flex: 1;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.dep-type-btn:hover {
+  color: var(--text-primary);
+}
+
+.dep-type-btn.active {
+  background: var(--bg-secondary);
+  color: var(--color-primary);
+  font-weight: var(--font-semibold);
+  box-shadow: var(--shadow-sm);
+}
+
+.dep-amount-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dep-amount-input {
+  flex: 1;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+.dep-amount-unit {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.dep-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.dep-modal-actions .btn {
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--text-sm);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .dep-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dep-nav {
+    justify-content: center;
+  }
+
+  .dep-add-btn {
+    align-self: flex-end;
+  }
+
+  .dep-kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dep-kpi-value {
+    font-size: var(--text-xl);
+  }
+
+  .dep-title {
+    font-size: var(--text-lg);
+  }
+
+  .dep-td-memo {
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dep-th,
+  .dep-td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+}

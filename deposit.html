@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>口座入出金管理 - REIJI</title>
+  <meta name="description" content="口座への入金・出金の履歴を管理">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/utilities.css">
+  <link rel="stylesheet" href="assets/css/shared-layout.css">
+  <link rel="stylesheet" href="assets/css/pages/deposit.css">
+</head>
+<body>
+  <!-- Crypto Ticker Bar -->
+  <div class="ticker-bar">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- Site Header -->
+  <header class="site-header">
+    <div class="container-wide site-header-inner">
+      <a href="dashboard.html" class="site-logo">
+        <img src="assets/img/logo.svg" alt="REIJI">
+        <span class="site-logo-text">REIJI</span>
+      </a>
+      <div class="forex-rates" id="forexRates"></div>
+      <div class="site-header-right">
+        <div class="site-clock" id="siteClock"></div>
+        <button class="theme-toggle" aria-label="テーマ切替"></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="site-nav">
+    <div class="container-wide site-nav-inner">
+      <a href="dashboard.html" class="site-nav-tab">TOPページ</a>
+      <a href="#" class="site-nav-tab">お知らせ</a>
+      <a href="#" class="site-nav-tab">コミュニティ</a>
+      <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
+      <a href="#" class="site-nav-tab" data-calc-open>簡易電卓</a>
+      <a href="#" class="site-nav-tab">サイトの使い方</a>
+      <a href="settings.html" class="site-nav-tab">ユーザー設定</a>
+      <button class="site-hamburger" id="siteHamburger" aria-label="メニュー">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Sidebar Overlay (mobile) -->
+  <div class="site-sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main Body -->
+  <main class="site-body">
+    <div class="container-wide site-layout">
+
+      <!-- Left Sidebar -->
+      <aside class="site-sidebar-left" id="sidebarLeft">
+        <div id="sidebarGroups"></div>
+        <a href="#" class="sidebar-line-cta">
+          <i class="fa-brands fa-line"></i> レイジへ相談する
+        </a>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="site-main">
+        <!-- Deposit Header -->
+        <div class="dep-header">
+          <div class="dep-nav">
+            <button class="btn btn-ghost dep-nav-btn" id="prevMonth" aria-label="前月">&lt;</button>
+            <h1 class="dep-title" id="depTitle">2026年2月</h1>
+            <button class="btn btn-ghost dep-nav-btn" id="nextMonth" aria-label="次月">&gt;</button>
+          </div>
+          <button class="btn btn-primary dep-add-btn" id="addEntry">
+            <i class="fa-solid fa-plus"></i> 追加
+          </button>
+        </div>
+
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-3 dep-kpi-grid" id="depKpi"></div>
+
+        <!-- Transaction Table -->
+        <div class="dep-table-wrapper">
+          <table class="dep-table" id="depTable">
+            <thead>
+              <tr>
+                <th class="dep-th">日付</th>
+                <th class="dep-th">種別</th>
+                <th class="dep-th dep-th-amount">金額</th>
+                <th class="dep-th">口座</th>
+                <th class="dep-th">方法</th>
+                <th class="dep-th">メモ</th>
+              </tr>
+            </thead>
+            <tbody id="depTableBody"></tbody>
+          </table>
+          <div class="dep-table-empty" id="depEmpty">この月の入出金データはありません</div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <aside class="site-sidebar-right" id="sidebarRight">
+        <div class="right-panel right-user">
+          <div class="avatar avatar-sm avatar-ring">
+            <img src="assets/img/avatars/default.svg" alt="">
+          </div>
+          <span class="right-user-name" id="rightUserName">投資太郎</span>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">損益サマリー</h3>
+          </div>
+          <div id="rightPnlSummary"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">仮想通貨レート</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div class="right-crypto-tabs">
+            <button class="right-crypto-tab active" data-tab="top5">TOP5</button>
+            <button class="right-crypto-tab" data-tab="trending">急上昇</button>
+          </div>
+          <div id="rightCryptoList"></div>
+        </div>
+        <div class="right-panel">
+          <div class="right-panel-header">
+            <h3 class="right-panel-title">経済指標</h3>
+            <a href="#" class="right-panel-more">すべて見る</a>
+          </div>
+          <div id="rightIndicators"></div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Add Entry Modal -->
+  <div class="modal-overlay" id="depModal">
+    <div class="modal-content dep-modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-money-bill-transfer"></i> 入出金を追加</h2>
+        <button class="modal-close" id="depModalClose">&times;</button>
+      </div>
+      <div id="depModalBody"></div>
+    </div>
+  </div>
+
+  <!-- Calculator Modal -->
+  <div class="modal-overlay" id="calcModal">
+    <div class="modal-content calc-modal">
+      <div class="modal-header">
+        <h2 class="modal-title"><i class="fa-solid fa-calculator"></i> 簡易電卓</h2>
+        <button class="modal-close" id="calcClose">&times;</button>
+      </div>
+      <div class="calc-display">
+        <div class="calc-display-expr" id="calcExpr"></div>
+        <div class="calc-display-value" id="calcValue">0</div>
+      </div>
+      <div class="calc-grid">
+        <button class="calc-btn calc-btn-func" data-action="clear">AC</button>
+        <button class="calc-btn calc-btn-func" data-action="negate">&plusmn;</button>
+        <button class="calc-btn calc-btn-func" data-action="percent">%</button>
+        <button class="calc-btn calc-btn-func" data-action="backspace">&larr;</button>
+        <button class="calc-btn calc-btn-num" data-digit="7">7</button>
+        <button class="calc-btn calc-btn-num" data-digit="8">8</button>
+        <button class="calc-btn calc-btn-num" data-digit="9">9</button>
+        <button class="calc-btn calc-btn-op" data-op="÷">&divide;</button>
+        <button class="calc-btn calc-btn-num" data-digit="4">4</button>
+        <button class="calc-btn calc-btn-num" data-digit="5">5</button>
+        <button class="calc-btn calc-btn-num" data-digit="6">6</button>
+        <button class="calc-btn calc-btn-op" data-op="×">&times;</button>
+        <button class="calc-btn calc-btn-num" data-digit="1">1</button>
+        <button class="calc-btn calc-btn-num" data-digit="2">2</button>
+        <button class="calc-btn calc-btn-num" data-digit="3">3</button>
+        <button class="calc-btn calc-btn-op" data-op="-">&minus;</button>
+        <button class="calc-btn calc-btn-num calc-btn-wide" data-digit="0">0</button>
+        <button class="calc-btn calc-btn-num" data-action="decimal">.</button>
+        <button class="calc-btn calc-btn-op" data-op="+">+</button>
+        <button class="calc-btn calc-btn-eq" data-action="equals">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container-wide">
+      <div class="site-footer-inner">
+        <div class="site-footer-links">
+          <a href="#" class="site-footer-icon" aria-label="LINE"><i class="fa-brands fa-line"></i></a>
+          <a href="#" class="site-footer-icon" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="#">利用規約</a>
+          <a href="#">プライバシーポリシー</a>
+        </div>
+        <div class="site-footer-copy">&copy; 2026 REIJI. All rights reserved.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/theme.js"></script>
+  <script src="assets/js/mock-data.js"></script>
+  <script src="assets/js/mock-data-shared.js"></script>
+  <script src="assets/js/shared-layout.js"></script>
+  <script src="assets/js/calculator.js"></script>
+  <script src="assets/js/deposit.js"></script>
+</body>
+</html>
