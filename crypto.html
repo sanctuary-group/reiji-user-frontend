@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TOPページ - REIJI</title>
-  <meta name="description" content="投資情報・損益記録・仮想通貨・為替の総合ポータル">
+  <title>仮想通貨レート一覧 - REIJI</title>
+  <meta name="description" content="仮想通貨の価格・変動率をリアルタイムで確認">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/utilities.css">
   <link rel="stylesheet" href="assets/css/shared-layout.css">
-  <link rel="stylesheet" href="assets/css/pages/top.css">
+  <link rel="stylesheet" href="assets/css/pages/crypto.css">
 </head>
 <body>
   <!-- Crypto Ticker Bar -->
@@ -43,7 +43,7 @@
   <!-- Navigation Tabs -->
   <nav class="site-nav">
     <div class="container-wide site-nav-inner">
-      <a href="dashboard.html" class="site-nav-tab active">TOPページ</a>
+      <a href="dashboard.html" class="site-nav-tab">TOPページ</a>
       <a href="#" class="site-nav-tab">お知らせ</a>
       <a href="#" class="site-nav-tab">コミュニティ</a>
       <a href="#" class="site-nav-tab">REIJI ACADEMY</a>
@@ -75,70 +75,49 @@
 
       <!-- Main Content -->
       <div class="site-main">
-        <!-- Banner Slider -->
-        <section class="top-banner">
-          <div class="banner-viewport" id="bannerViewport">
-            <div class="banner-track" id="bannerTrack"></div>
-          </div>
-          <div class="banner-dots" id="bannerDots"></div>
-        </section>
+        <div class="crypt-header">
+          <h1 class="crypt-title"><i class="fa-solid fa-coins"></i> 仮想通貨レート一覧</h1>
+          <a href="dashboard.html" class="crypt-back">&larr; TOPページに戻る</a>
+        </div>
 
-        <!-- お知らせ -->
-        <section class="top-section">
-          <div class="top-section-header">
-            <h2 class="top-section-title">お知らせ</h2>
-            <a href="notices.html" class="top-section-more">すべて見る &rarr;</a>
-          </div>
-          <div class="notice-table" id="noticeTable"></div>
-        </section>
+        <div class="crypt-tabs">
+          <button class="crypt-tab active" data-tab="marketcap">時価総額順</button>
+          <button class="crypt-tab" data-tab="trending">急上昇</button>
+        </div>
 
-        <!-- Reijiの最新動画 -->
-        <section class="top-section">
-          <div class="top-section-header">
-            <h2 class="top-section-title">Reijiの最新動画</h2>
-            <a href="videos.html" class="top-section-more">すべて見る &rarr;</a>
-          </div>
-          <div class="video-grid" id="videoGrid"></div>
-        </section>
+        <div class="crypt-table-wrapper">
+          <table class="crypt-table">
+            <thead>
+              <tr>
+                <th class="crypt-th crypt-th-rank">#</th>
+                <th class="crypt-th">名前</th>
+                <th class="crypt-th crypt-th-price">価格</th>
+                <th class="crypt-th crypt-th-change">24h変動率</th>
+              </tr>
+            </thead>
+            <tbody id="cryptoTableBody"></tbody>
+          </table>
+        </div>
 
-        <!-- 仮想通貨最新ニュース -->
-        <section class="top-section">
-          <div class="top-section-header">
-            <h2 class="top-section-title">仮想通貨最新ニュース</h2>
-            <a href="crypto-news.html" class="top-section-more">仮想通貨情報を見る &rarr;</a>
-          </div>
-          <div class="news-list" id="cryptoNewsList"></div>
-        </section>
-
-        <!-- 為替最新ニュース -->
-        <section class="top-section">
-          <div class="top-section-header">
-            <h2 class="top-section-title">為替最新ニュース</h2>
-            <a href="forex-news.html" class="top-section-more">FX情報を見る &rarr;</a>
-          </div>
-          <div class="news-list" id="forexNewsList"></div>
-        </section>
+        <div class="crypt-disclaimer">
+          <p>※ データはCoinMarketCap APIより取得（デモ用モックデータ）</p>
+        </div>
       </div>
 
       <!-- Right Sidebar -->
       <aside class="site-sidebar-right" id="sidebarRight">
-        <!-- User -->
         <div class="right-panel right-user">
           <div class="avatar avatar-sm avatar-ring">
             <img src="assets/img/avatars/default.svg" alt="">
           </div>
           <span class="right-user-name" id="rightUserName">投資太郎</span>
         </div>
-
-        <!-- P&L Summary -->
         <div class="right-panel">
           <div class="right-panel-header">
             <h3 class="right-panel-title">損益サマリー</h3>
           </div>
           <div id="rightPnlSummary"></div>
         </div>
-
-        <!-- Crypto Rates -->
         <div class="right-panel">
           <div class="right-panel-header">
             <h3 class="right-panel-title">仮想通貨レート</h3>
@@ -150,8 +129,6 @@
           </div>
           <div id="rightCryptoList"></div>
         </div>
-
-        <!-- Economic Indicators -->
         <div class="right-panel">
           <div class="right-panel-header">
             <h3 class="right-panel-title">経済指標</h3>
@@ -218,9 +195,8 @@
   <script src="assets/js/theme.js"></script>
   <script src="assets/js/mock-data.js"></script>
   <script src="assets/js/mock-data-shared.js"></script>
-  <script src="assets/js/mock-data-top.js"></script>
   <script src="assets/js/shared-layout.js"></script>
   <script src="assets/js/calculator.js"></script>
-  <script src="assets/js/top.js"></script>
+  <script src="assets/js/crypto.js"></script>
 </body>
 </html>

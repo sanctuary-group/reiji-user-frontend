@@ -1,0 +1,98 @@
+/* ========================================
+   Notices (お知らせ一覧) Page Styles
+   ======================================== */
+
+/* ---- Header ---- */
+.ntc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.ntc-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.ntc-title i {
+  margin-right: var(--space-2);
+  color: var(--color-primary);
+}
+
+.ntc-back {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.ntc-back:hover {
+  text-decoration: underline;
+}
+
+/* ---- Card List ---- */
+.ntc-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.ntc-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-base);
+}
+
+.ntc-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.ntc-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.ntc-card-date {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.ntc-card-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  line-height: var(--leading-normal);
+}
+
+.ntc-card-excerpt {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .ntc-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ntc-title {
+    font-size: var(--text-lg);
+  }
+
+  .ntc-card {
+    padding: var(--space-4);
+  }
+}

@@ -1,0 +1,207 @@
+/* ========================================
+   Economic Indicators (経済指標カレンダー) Page Styles
+   ======================================== */
+
+/* ---- Header ---- */
+.indi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.indi-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.indi-nav-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+}
+
+.indi-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  min-width: 220px;
+  text-align: center;
+}
+
+.indi-back {
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.indi-back:hover {
+  text-decoration: underline;
+}
+
+/* ---- Legend ---- */
+.indi-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.indi-legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.indi-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+}
+
+.indi-dot.high {
+  background: var(--color-loss);
+}
+
+.indi-dot.medium {
+  background: var(--color-primary);
+}
+
+.indi-dot.low {
+  background: var(--text-tertiary);
+}
+
+/* ---- Table ---- */
+.indi-table-wrapper {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+  -webkit-overflow-scrolling: touch;
+}
+
+.indi-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+}
+
+.indi-th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-primary);
+  white-space: nowrap;
+}
+
+.indi-th-importance {
+  text-align: center;
+  width: 60px;
+}
+
+.indi-th-val {
+  text-align: right;
+}
+
+.indi-td {
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-primary);
+  white-space: nowrap;
+}
+
+.indi-tr:last-child .indi-td {
+  border-bottom: none;
+}
+
+.indi-tr:hover .indi-td {
+  background: var(--hover-bg);
+}
+
+.indi-td-time {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.indi-td-country {
+  font-weight: var(--font-bold);
+  text-align: center;
+}
+
+.indi-td-importance {
+  text-align: center;
+}
+
+.indi-td-val {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.indi-val-actual {
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.indi-val-pending {
+  color: var(--text-tertiary);
+}
+
+/* ---- Empty State ---- */
+.indi-empty {
+  display: none;
+  text-align: center;
+  padding: var(--space-8);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.indi-empty.visible {
+  display: block;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .indi-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .indi-nav {
+    justify-content: center;
+  }
+
+  .indi-back {
+    text-align: right;
+  }
+
+  .indi-title {
+    font-size: var(--text-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  .indi-th,
+  .indi-td {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+  }
+}
