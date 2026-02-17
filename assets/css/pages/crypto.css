@@ -95,13 +95,18 @@
 }
 
 .crypt-th-rank {
-  width: 50px;
+  width: 40px;
   text-align: center;
+}
+
+.crypt-th-name {
+  width: 1%;
+  white-space: nowrap;
 }
 
 .crypt-th-price,
 .crypt-th-change {
-  text-align: right;
+  text-align: center;
 }
 
 .crypt-td {
@@ -141,16 +146,17 @@
 .crypt-fullname {
   font-size: var(--text-xs);
   color: var(--text-tertiary);
+  white-space: nowrap;
 }
 
 .crypt-td-price {
-  text-align: right;
+  text-align: center;
   font-family: var(--font-mono);
   font-weight: var(--font-semibold);
 }
 
 .crypt-td-change {
-  text-align: right;
+  text-align: center;
   font-family: var(--font-mono);
   font-weight: var(--font-bold);
 }
