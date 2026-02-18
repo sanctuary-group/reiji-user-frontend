@@ -1,0 +1,243 @@
+/* ========================================
+   Tax Calculator Page
+   ======================================== */
+
+/* ---- Page Header ---- */
+.tax-header {
+  margin-bottom: var(--space-6);
+}
+
+.tax-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+/* ---- Calculator Card ---- */
+.tax-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---- Toggle Buttons ---- */
+.tax-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.tax-toggle-btn {
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.tax-toggle-btn:hover {
+  background: var(--border-primary);
+}
+
+.tax-toggle-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+/* ---- Helper Text ---- */
+.tax-helper {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-5);
+}
+
+/* ---- Input ---- */
+.tax-input {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.tax-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.tax-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.tax-note {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+}
+
+/* ---- Execute Button ---- */
+.tax-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--space-3) var(--space-5);
+  margin-top: var(--space-5);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 16px rgba(217, 119, 6, 0.3);
+}
+
+.tax-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(217, 119, 6, 0.4);
+}
+
+.tax-button:active {
+  transform: translateY(0);
+}
+
+/* ---- Result Area ---- */
+.tax-result-area {
+  margin-top: var(--space-6);
+  padding: var(--space-5);
+  border-left: 5px solid var(--color-primary);
+  background: var(--bg-tertiary);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.tax-result-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+}
+
+/* ---- Top Summary (take-home highlight) ---- */
+.tax-result-summary {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-5);
+  line-height: var(--leading-relaxed);
+}
+
+.tax-result-highlight {
+  position: relative;
+  display: inline;
+  font-size: var(--text-2xl);
+  color: var(--color-primary);
+}
+
+.tax-result-highlight::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  bottom: 2px;
+  width: 0;
+  height: 40%;
+  background: rgba(251, 191, 36, 0.35);
+  z-index: -1;
+  transition: width 0.8s ease;
+}
+
+.tax-result-highlight.marker-active::after {
+  width: calc(100% + 8px);
+}
+
+[data-theme="dark"] .tax-result-highlight::after {
+  background: rgba(251, 191, 36, 0.2);
+}
+
+/* ---- Result Detail Section ---- */
+.tax-result-detail-label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tax-result-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tax-result-item:last-child {
+  border-bottom: none;
+}
+
+.tax-result-item-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.tax-result-item-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.tax-result-item.total {
+  padding-top: var(--space-4);
+  margin-top: var(--space-2);
+  border-top: 2px solid var(--color-primary);
+  border-bottom: none;
+}
+
+.tax-result-item.total .tax-result-item-label {
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.tax-result-item.total .tax-result-item-value {
+  font-size: var(--text-lg);
+  color: var(--color-primary);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .tax-card {
+    padding: var(--space-4);
+  }
+
+  .tax-result-area {
+    padding: var(--space-4);
+  }
+
+  .tax-result-summary {
+    font-size: var(--text-base);
+  }
+
+  .tax-result-highlight {
+    font-size: var(--text-xl);
+  }
+
+  .tax-title {
+    font-size: var(--text-xl);
+  }
+}

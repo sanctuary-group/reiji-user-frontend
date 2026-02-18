@@ -39,7 +39,7 @@ var MOCK_SIDEBAR_LINKS = [
     label: 'シミュレーション',
     icon: '<i class="fa-solid fa-calculator"></i>',
     items: [
-      { label: '税金計算ツール', href: '#' }
+      { label: '税金計算ツール', href: 'tax-calculator.html' }
     ]
   },
   {
