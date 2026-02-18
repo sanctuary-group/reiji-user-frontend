@@ -6,6 +6,35 @@
   var currentMonth = 2; // 1-indexed
   var modalDay = null;  // currently open day number
 
+  var onboardStep = 0;
+  var totalOnboardSteps = 3;
+
+  var ONBOARD_STEPS = [
+    {
+      text: '記録したい日付をクリックして、損益を記録しましょう',
+      getTarget: function () {
+        return document.querySelector('.cal-day.today') ||
+               document.querySelector('.cal-day:not(.other-month)');
+      },
+      arrowPos: 'top'
+    },
+    {
+      text: 'ここから記録の追加・編集ができます',
+      getTarget: function () {
+        return document.getElementById('modalEditBtn');
+      },
+      arrowPos: 'top'
+    },
+    {
+      text: 'カテゴリを選んで金額を入力し、保存しましょう',
+      getTarget: function () {
+        return document.querySelector('.modal-edit-cats') ||
+               document.querySelector('.modal-edit-section');
+      },
+      arrowPos: 'top'
+    }
+  ];
+
   document.addEventListener('DOMContentLoaded', function () {
     startClock();
     renderCalendar();
@@ -29,8 +58,27 @@
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        if (document.getElementById('onboardOverlay').classList.contains('active')) {
+          endOnboarding();
+        } else {
+          closeModal();
+        }
+      }
     });
+
+    // Onboarding buttons
+    document.getElementById('onboardSkip').addEventListener('click', function () {
+      endOnboarding();
+    });
+    document.getElementById('onboardNext').addEventListener('click', function () {
+      nextOnboardStep();
+    });
+
+    // Start onboarding after a short delay
+    setTimeout(function () {
+      startOnboarding();
+    }, 800);
   });
 
   function startClock() {
@@ -382,5 +430,161 @@
     // Show updated view mode
     var data = MOCK_CALENDAR[key] || {};
     showViewMode(day, data[day]);
+  }
+
+  /* ---- Onboarding Guide ---- */
+
+  function startOnboarding() {
+    if (localStorage.getItem('cal_onboarding_done')) return;
+
+    onboardStep = 0;
+    document.body.classList.add('onboard-active');
+    document.getElementById('onboardOverlay').classList.add('active');
+    showOnboardStep(0);
+  }
+
+  function showOnboardStep(step) {
+    onboardStep = step;
+    var config = ONBOARD_STEPS[step];
+    var target = config.getTarget();
+    if (!target) { endOnboarding(); return; }
+
+    // Clear previous spotlight
+    var prev = document.querySelector('.onboard-spotlight');
+    if (prev) prev.classList.remove('onboard-spotlight');
+
+    // Add spotlight to target
+    target.classList.add('onboard-spotlight');
+
+    // Update tooltip text
+    document.getElementById('onboardText').textContent = config.text;
+
+    // Update step dots
+    var dotsHtml = '';
+    for (var i = 0; i < totalOnboardSteps; i++) {
+      dotsHtml += '<span class="onboard-dot' + (i === step ? ' active' : '') + '"></span>';
+    }
+    document.getElementById('onboardDots').innerHTML = dotsHtml;
+
+    // Update button text
+    var nextBtn = document.getElementById('onboardNext');
+    if (step === totalOnboardSteps - 1) {
+      nextBtn.textContent = 'はじめる';
+    } else {
+      nextBtn.textContent = '次へ';
+    }
+
+    // Position tooltip
+    positionTooltip(target, config.arrowPos);
+
+    // Show tooltip
+    document.getElementById('onboardTooltip').classList.add('active');
+  }
+
+  function positionTooltip(target, arrowPos) {
+    var tooltip = document.getElementById('onboardTooltip');
+    var arrow = document.getElementById('onboardArrow');
+    var rect = target.getBoundingClientRect();
+
+    // Reset classes
+    arrow.className = 'onboard-tooltip-arrow';
+
+    // Calculate position
+    var tooltipWidth = 340;
+    var gap = 16;
+
+    // Place below or above the target
+    var top, left;
+
+    if (arrowPos === 'top') {
+      // Tooltip below target, arrow on top
+      top = rect.bottom + gap;
+      arrow.classList.add('top');
+    } else {
+      // Tooltip above target, arrow on bottom
+      top = rect.top - gap;
+      arrow.classList.add('bottom');
+    }
+
+    // Center horizontally relative to target
+    left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+
+    // Keep within viewport
+    var viewWidth = window.innerWidth;
+    var viewHeight = window.innerHeight;
+    if (left < 12) left = 12;
+    if (left + tooltipWidth > viewWidth - 12) left = viewWidth - tooltipWidth - 12;
+
+    // If tooltip goes below viewport, place above instead
+    if (arrowPos === 'top' && top + 180 > viewHeight) {
+      top = rect.top - 180 - gap;
+      arrow.className = 'onboard-tooltip-arrow bottom';
+    }
+
+    tooltip.style.top = top + 'px';
+    tooltip.style.left = left + 'px';
+
+    // Adjust arrow horizontal position to point at target center
+    var arrowLeft = rect.left + (rect.width / 2) - left;
+    arrowLeft = Math.max(20, Math.min(arrowLeft, tooltipWidth - 20));
+    arrow.style.left = arrowLeft + 'px';
+    arrow.style.marginLeft = '0';
+  }
+
+  function nextOnboardStep() {
+    var nextStep = onboardStep + 1;
+
+    if (nextStep >= totalOnboardSteps) {
+      endOnboarding();
+      return;
+    }
+
+    // Clear current spotlight
+    var prev = document.querySelector('.onboard-spotlight');
+    if (prev) prev.classList.remove('onboard-spotlight');
+    document.getElementById('onboardTooltip').classList.remove('active');
+
+    if (nextStep === 1) {
+      // Step 2: Open modal on a target day
+      var targetCell = document.querySelector('.cal-day.today') ||
+                       document.querySelector('.cal-day:not(.other-month)');
+      if (targetCell) {
+        var day = parseInt(targetCell.getAttribute('data-day'));
+        var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
+        var data = MOCK_CALENDAR[key] || {};
+        openModal(day, data[day]);
+      }
+
+      // Wait for modal to render, then show step
+      setTimeout(function () {
+        showOnboardStep(1);
+      }, 350);
+    } else if (nextStep === 2) {
+      // Step 3: Click edit button to show edit mode
+      var editBtn = document.getElementById('modalEditBtn');
+      if (editBtn) editBtn.click();
+
+      // Wait for edit mode to render
+      setTimeout(function () {
+        showOnboardStep(2);
+      }, 350);
+    }
+  }
+
+  function endOnboarding() {
+    // Clear spotlight
+    var prev = document.querySelector('.onboard-spotlight');
+    if (prev) prev.classList.remove('onboard-spotlight');
+
+    // Hide overlay and tooltip
+    document.getElementById('onboardOverlay').classList.remove('active');
+    document.getElementById('onboardTooltip').classList.remove('active');
+    document.body.classList.remove('onboard-active');
+
+    // Close modal if open
+    closeModal();
+
+    // Save to localStorage
+    localStorage.setItem('cal_onboarding_done', '1');
   }
 })();
