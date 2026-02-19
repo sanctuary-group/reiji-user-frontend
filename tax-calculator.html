@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,9 @@
   <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="assets/css/variables.css">
   <link rel="stylesheet" href="assets/css/reset.css">
@@ -19,6 +22,7 @@
   <link rel="stylesheet" href="assets/css/shared-layout.css">
   <link rel="stylesheet" href="assets/css/pages/tax-calculator.css">
 </head>
+
 <body>
   <!-- Crypto Ticker Bar -->
   <div class="ticker-bar">
@@ -127,6 +131,14 @@
               <span class="tax-result-item-value"><span id="taxResultTakeHome">0</span> 円</span>
             </div>
           </div>
+
+          <div class="tax-helper" style="margin-top: var(--space-6); margin-bottom: 0;">
+            ※本ツールは日本の税制をもとにした「概算シミュレーション」です。<br>
+            ※実際の税額は、扶養・控除・居住地・年度の税制改正などにより変動します。<br>
+            ※ 正確な税額は、税理士・公的機関の案内をご確認ください。<br>
+            ※本ツールは「海外FX業者（Vantageなど）」を利用した場合の税制を前提に、雑所得（総合課税・累進課税）で概算計算しています。<br>
+            ※国内FX業者を利用した場合は「申告分離課税（税率約20.315%）」となり、本ツールの結果とは税額が大きく異なります。
+          </div>
         </div>
       </div>
 
@@ -225,4 +237,5 @@
   <script src="assets/js/calculator.js"></script>
   <script src="assets/js/tax-calculator.js"></script>
 </body>
+
 </html>
