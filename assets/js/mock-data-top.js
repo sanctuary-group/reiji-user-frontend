@@ -17,10 +17,7 @@ var MOCK_NOTICES = [
 var MOCK_VIDEOS = [
   { title: '【2026年2月】仮想通貨市場レビュー', date: '2026/02/09', views: '12.5万', bgColor: '#ef4444' },
   { title: '初心者必見！FXで勝てるチャート分析', date: '2026/02/07', views: '8.2万', bgColor: '#3b82f6' },
-  { title: '確定申告のやり方完全ガイド', date: '2026/02/05', views: '25.1万', bgColor: '#10b981' },
-  { title: 'ビットコイン今後の値動き予想', date: '2026/02/03', views: '18.7万', bgColor: '#f59e0b' },
-  { title: '日本株おすすめ銘柄5選', date: '2026/02/01', views: '6.3万', bgColor: '#8b5cf6' },
-  { title: '損切りのタイミングを解説', date: '2026/01/30', views: '9.8万', bgColor: '#ec4899' }
+  { title: '確定申告のやり方完全ガイド', date: '2026/02/05', views: '25.1万', bgColor: '#10b981' }
 ];
 
 var MOCK_CRYPTO_NEWS = [

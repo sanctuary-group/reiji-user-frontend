@@ -98,8 +98,10 @@
     var container = document.getElementById('videoGrid');
     if (!container || typeof MOCK_VIDEOS === 'undefined') return;
 
+    var isMobile = window.innerWidth <= 768;
+    var maxItems = isMobile ? 2 : MOCK_VIDEOS.length;
     var html = '';
-    for (var i = 0; i < MOCK_VIDEOS.length; i++) {
+    for (var i = 0; i < maxItems && i < MOCK_VIDEOS.length; i++) {
       var v = MOCK_VIDEOS[i];
       html += '<div class="video-card">' +
         '<div class="video-thumb" style="background:' + v.bgColor + '"></div>' +
