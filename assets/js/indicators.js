@@ -62,7 +62,7 @@
         '<td class="indi-td indi-td-time">' + ind.time + '</td>' +
         '<td class="indi-td indi-td-country">' + ind.country + '</td>' +
         '<td class="indi-td">' + ind.name + '</td>' +
-        '<td class="indi-td indi-td-importance"><span class="indi-dot ' + ind.importance + '"></span></td>' +
+        '<td class="indi-td indi-td-importance"><span class="indi-stars ' + ind.importance + '">' + (ind.importance === 'high' ? '★★★' : ind.importance === 'medium' ? '★★' : '★') + '</span></td>' +
         '<td class="indi-td indi-td-val">' + actualHtml + '</td>' +
         '<td class="indi-td indi-td-val">' + ind.forecast + '</td>' +
         '<td class="indi-td indi-td-val">' + ind.previous + '</td>' +

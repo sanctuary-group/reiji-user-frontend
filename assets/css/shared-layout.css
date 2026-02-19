@@ -673,22 +673,22 @@
 }
 
 .right-indicator-importance {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
+  font-size: 10px;
+  letter-spacing: 1px;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .right-indicator-importance.high {
-  background: var(--color-profit);
+  color: var(--color-loss);
 }
 
 .right-indicator-importance.medium {
-  background: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .right-indicator-importance.low {
-  background: var(--text-tertiary);
+  color: var(--text-tertiary);
 }
 
 .right-indicator-values {

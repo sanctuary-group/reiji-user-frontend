@@ -64,23 +64,22 @@
   gap: var(--space-1);
 }
 
-.indi-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
+.indi-stars {
+  font-size: 10px;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
-.indi-dot.high {
-  background: var(--color-loss);
+.indi-stars.high {
+  color: var(--color-loss);
 }
 
-.indi-dot.medium {
-  background: var(--color-primary);
+.indi-stars.medium {
+  color: var(--color-primary);
 }
 
-.indi-dot.low {
-  background: var(--text-tertiary);
+.indi-stars.low {
+  color: var(--text-tertiary);
 }
 
 /* ---- Table ---- */

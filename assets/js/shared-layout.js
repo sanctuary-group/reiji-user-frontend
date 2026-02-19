@@ -282,11 +282,12 @@
     for (var i = 0; i < MOCK_ECONOMIC_INDICATORS.length; i++) {
       var ind = MOCK_ECONOMIC_INDICATORS[i];
       var actualHtml = ind.actual ? '<span class="right-indicator-val actual">' + ind.actual + '</span>' : '<span class="right-indicator-val">-</span>';
+      var stars = ind.importance === 'high' ? '★★★' : ind.importance === 'medium' ? '★★' : '★';
       html += '<div class="right-indicator-item">' +
         '<span class="right-indicator-time">' + ind.time + '</span>' +
         '<span class="right-indicator-country">' + ind.country + '</span>' +
         '<span class="right-indicator-name">' + ind.name + '</span>' +
-        '<span class="right-indicator-importance ' + ind.importance + '"></span>' +
+        '<span class="right-indicator-importance ' + ind.importance + '">' + stars + '</span>' +
         '<div class="right-indicator-values">' +
           actualHtml +
           '<span class="right-indicator-val">' + ind.forecast + '</span>' +
