@@ -163,50 +163,55 @@
     }
   }
 
-  // ---- Nav User (moved from right sidebar) ----
+  // ---- Right Sidebar: User ----
   function renderRightUser() {
     var userName = (typeof MOCK_USER !== 'undefined') ? MOCK_USER.name : '投資太郎';
 
-    // Update sidebar user name (if element still exists)
+    // Update right sidebar user name
     var nameEl = document.getElementById('rightUserName');
     if (nameEl) nameEl.textContent = userName;
 
-    // Create nav user button inside site-nav-inner
-    var navInner = document.querySelector('.site-nav-inner');
-    if (!navInner) return;
-
-    var navUser = document.createElement('div');
-    navUser.className = 'nav-user';
-    navUser.innerHTML =
-      '<div class="avatar avatar-sm avatar-ring">' +
-        '<img src="assets/img/avatars/default.svg" alt="">' +
-      '</div>' +
-      '<span class="nav-user-name">' + userName + '</span>' +
-      '<i class="fa-solid fa-chevron-down nav-user-chevron"></i>' +
-      '<div class="nav-user-dropdown">' +
-        '<a href="settings.html" class="nav-user-dropdown-item">' +
+    // Add dropdown to right sidebar user panel
+    var rightUser = document.querySelector('.right-user');
+    if (rightUser) {
+      var dropdown = document.createElement('div');
+      dropdown.className = 'right-user-dropdown';
+      dropdown.innerHTML =
+        '<a href="settings.html" class="right-user-dropdown-item">' +
           '<i class="fa-solid fa-gear"></i> ユーザー設定</a>' +
-        '<a href="index.html" class="nav-user-dropdown-item">' +
-          '<i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>' +
-      '</div>';
+        '<a href="index.html" class="right-user-dropdown-item">' +
+          '<i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>';
+      rightUser.appendChild(dropdown);
 
-    // Append to site-nav-inner (absolutely positioned via CSS)
-    navInner.appendChild(navUser);
+      rightUser.addEventListener('click', function (e) {
+        e.stopPropagation();
+        rightUser.classList.toggle('open');
+      });
 
-    var dropdown = navUser.querySelector('.nav-user-dropdown');
+      document.addEventListener('click', function () {
+        rightUser.classList.remove('open');
+      });
+    }
 
-    // Toggle on click
-    navUser.addEventListener('click', function (e) {
-      e.stopPropagation();
-      navUser.classList.toggle('open');
-      dropdown.classList.toggle('open');
-    });
+    // Add user section to left sidebar for mobile hamburger menu
+    var sidebarLeft = document.getElementById('sidebarLeft');
+    if (!sidebarLeft) return;
 
-    // Close on outside click
-    document.addEventListener('click', function () {
-      navUser.classList.remove('open');
-      dropdown.classList.remove('open');
-    });
+    var mobileUser = document.createElement('div');
+    mobileUser.className = 'sidebar-mobile-user';
+    mobileUser.innerHTML =
+      '<div class="sidebar-mobile-user-info">' +
+        '<div class="avatar avatar-sm avatar-ring">' +
+          '<img src="assets/img/avatars/default.svg" alt="">' +
+        '</div>' +
+        '<span class="sidebar-mobile-user-name">' + userName + '</span>' +
+      '</div>' +
+      '<a href="settings.html" class="sidebar-mobile-user-link">' +
+        '<i class="fa-solid fa-gear"></i> ユーザー設定</a>' +
+      '<a href="index.html" class="sidebar-mobile-user-link">' +
+        '<i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>';
+
+    sidebarLeft.appendChild(mobileUser);
   }
 
   // ---- Right Sidebar: P&L Summary ----
