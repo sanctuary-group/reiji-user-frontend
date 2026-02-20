@@ -219,3 +219,11 @@ var MOCK_DEPOSITS = [
   { id: 21, date: '2026-02-10', type: 'deposit',    amount: 200000,  account: 'bitflyer',  method: 'transfer', memo: 'ETH購入用' },
   { id: 22, date: '2026-02-12', type: 'deposit',    amount: 100000,  account: 'matsui',    method: 'auto',     memo: '自動積立' }
 ];
+
+var MOCK_CRYPTO_HOLDINGS = [
+  { symbol: 'BTC',  name: 'Bitcoin',  quantity: 0.5 },
+  { symbol: 'ETH',  name: 'Ethereum', quantity: 3.2 },
+  { symbol: 'XRP',  name: 'XRP',      quantity: 5000 },
+  { symbol: 'SOL',  name: 'Solana',   quantity: 12 },
+  { symbol: 'DOGE', name: 'Dogecoin',  quantity: 20000 }
+];

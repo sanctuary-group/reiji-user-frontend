@@ -454,6 +454,194 @@
   font-size: var(--text-lg);
 }
 
+/* ---- Crypto Holdings List ---- */
+.crypto-holdings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.crypto-holding-item {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.crypto-holding-item:hover {
+  border-color: var(--border-secondary);
+}
+
+.crypto-holding-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.crypto-holding-edit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.crypto-edit-symbol {
+  flex: 1;
+}
+
+.crypto-edit-qty {
+  width: 100px;
+}
+
+.crypto-holding-symbol {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  min-width: 48px;
+}
+
+.crypto-holding-name {
+  flex: 1;
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crypto-holding-qty {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.crypto-holding-value {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  min-width: 100px;
+  text-align: right;
+}
+
+/* Add row */
+.crypto-holdings-add-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.crypto-holdings-add-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+  height: 42px;
+}
+
+/* ---- Donut Chart ---- */
+.crypto-donut-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: var(--space-4) 0 var(--space-5);
+}
+
+.crypto-donut {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crypto-donut-hole {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.crypto-donut-center-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.crypto-donut-center-value {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  margin-top: var(--space-1);
+}
+
+/* Legend Table */
+.crypto-legend-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.crypto-legend-header {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-primary);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-weight: var(--font-medium);
+}
+
+.crypto-legend-header span:first-child {
+  flex: 1;
+}
+
+.crypto-legend-header span:nth-child(2),
+.crypto-legend-header span:nth-child(3) {
+  width: 80px;
+  text-align: right;
+}
+
+.crypto-legend-row {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.crypto-legend-row:last-child {
+  border-bottom: none;
+}
+
+.crypto-legend-currency {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.crypto-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.crypto-legend-pct,
+.crypto-legend-qty {
+  width: 80px;
+  text-align: right;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .settings-tabs {
@@ -495,5 +683,24 @@
 
   .settings-avatar-actions {
     align-items: center;
+  }
+
+  .crypto-holdings-add-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .crypto-holding-value {
+    display: none;
+  }
+
+  .crypto-donut {
+    width: 150px;
+    height: 150px;
+  }
+
+  .crypto-donut-hole {
+    width: 92px;
+    height: 92px;
   }
 }
