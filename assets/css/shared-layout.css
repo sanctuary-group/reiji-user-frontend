@@ -178,6 +178,7 @@
   top: 0;
   z-index: var(--z-site-nav);
   height: var(--site-nav-height);
+  /* relative for nav-user absolute positioning */
 }
 
 .site-nav-inner {
@@ -185,9 +186,6 @@
   align-items: center;
   height: 100%;
   gap: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
 }
 
 .site-nav-inner::-webkit-scrollbar {
@@ -452,33 +450,57 @@
   text-decoration: underline;
 }
 
-/* User panel */
+/* User panel (sidebar) — hidden, moved to nav */
 .right-user {
+  display: none;
+}
+
+/* ---- Nav User Button ---- */
+.nav-user {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  position: relative;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
   cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  height: 100%;
+  margin-left: auto;
 }
 
-.right-user-name {
+.nav-user .avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.nav-user-name {
   font-size: var(--text-sm);
-  font-weight: var(--font-bold);
+  font-weight: var(--font-medium);
   color: var(--text-primary);
+  white-space: nowrap;
 }
 
-/* User dropdown */
-.right-user-dropdown {
+.nav-user-chevron {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  transition: transform var(--transition-fast);
+}
+
+.nav-user.open .nav-user-chevron {
+  transform: rotate(180deg);
+}
+
+/* Nav User dropdown */
+.nav-user-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
   right: 0;
+  min-width: 160px;
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-md);
   padding: var(--space-2);
-  margin-top: var(--space-2);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-4px);
@@ -486,13 +508,13 @@
   z-index: 10;
 }
 
-.right-user-dropdown.open {
+.nav-user-dropdown.open {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
 }
 
-.right-user-dropdown-item {
+.nav-user-dropdown-item {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -502,14 +524,17 @@
   color: var(--text-primary);
   text-decoration: none;
   transition: background var(--transition-fast);
+  white-space: nowrap;
 }
 
-.right-user-dropdown-item:hover {
+.nav-user-dropdown-item:hover {
   background: var(--hover-bg);
 }
 
-.right-user-dropdown-item i {
+.nav-user-dropdown-item i {
   color: var(--text-secondary);
+  width: 16px;
+  text-align: center;
 }
 
 /* P&L Summary */
@@ -853,7 +878,25 @@
   }
 
   .site-nav-inner {
-    padding-right: 48px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-right: 96px;
+  }
+
+  .site-nav-inner::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-user {
+    position: absolute;
+    right: 48px;
+    top: 0;
+    bottom: 0;
+    margin-left: 0;
+    padding: 0 var(--space-2);
+    background: var(--bg-secondary);
+    z-index: 2;
   }
 }
 
@@ -864,8 +907,17 @@
   }
 
   .site-sidebar-right {
+    display: none;
+  }
+
+  .page-top .site-sidebar-right {
+    display: flex;
     position: static;
     max-height: none;
+  }
+
+  .nav-user-name {
+    display: none;
   }
 
   .forex-rates {

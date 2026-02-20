@@ -163,31 +163,48 @@
     }
   }
 
-  // ---- Right Sidebar: User ----
+  // ---- Nav User (moved from right sidebar) ----
   function renderRightUser() {
+    var userName = (typeof MOCK_USER !== 'undefined') ? MOCK_USER.name : '投資太郎';
+
+    // Update sidebar user name (if element still exists)
     var nameEl = document.getElementById('rightUserName');
-    if (nameEl && typeof MOCK_USER !== 'undefined') {
-      nameEl.textContent = MOCK_USER.name;
-    }
+    if (nameEl) nameEl.textContent = userName;
 
-    var userPanel = document.querySelector('.right-user');
-    if (!userPanel) return;
+    // Create nav user button inside site-nav-inner
+    var navInner = document.querySelector('.site-nav-inner');
+    if (!navInner) return;
 
-    // Add dropdown
-    var dropdown = document.createElement('div');
-    dropdown.className = 'right-user-dropdown';
-    dropdown.innerHTML = '<a href="index.html" class="right-user-dropdown-item">' +
-      '<i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>';
-    userPanel.appendChild(dropdown);
+    var navUser = document.createElement('div');
+    navUser.className = 'nav-user';
+    navUser.innerHTML =
+      '<div class="avatar avatar-sm avatar-ring">' +
+        '<img src="assets/img/avatars/default.svg" alt="">' +
+      '</div>' +
+      '<span class="nav-user-name">' + userName + '</span>' +
+      '<i class="fa-solid fa-chevron-down nav-user-chevron"></i>' +
+      '<div class="nav-user-dropdown">' +
+        '<a href="settings.html" class="nav-user-dropdown-item">' +
+          '<i class="fa-solid fa-gear"></i> ユーザー設定</a>' +
+        '<a href="index.html" class="nav-user-dropdown-item">' +
+          '<i class="fa-solid fa-right-from-bracket"></i> ログアウト</a>' +
+      '</div>';
+
+    // Append to site-nav-inner (absolutely positioned via CSS)
+    navInner.appendChild(navUser);
+
+    var dropdown = navUser.querySelector('.nav-user-dropdown');
 
     // Toggle on click
-    userPanel.addEventListener('click', function (e) {
+    navUser.addEventListener('click', function (e) {
       e.stopPropagation();
+      navUser.classList.toggle('open');
       dropdown.classList.toggle('open');
     });
 
     // Close on outside click
     document.addEventListener('click', function () {
+      navUser.classList.remove('open');
       dropdown.classList.remove('open');
     });
   }
