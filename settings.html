@@ -422,6 +422,36 @@
               <button type="button" class="btn btn-primary" id="saveCryptoHoldings">保存する</button>
             </div>
           </div>
+
+          <!-- カスタム通貨登録 -->
+          <div class="settings-card mt-6">
+            <div class="settings-card-header">
+              <h2 class="settings-card-title">カスタム通貨登録</h2>
+              <p class="settings-card-desc">選択肢にない通貨を追加できます。色はチャート表示に使用されます。</p>
+            </div>
+
+            <div class="custom-coins-list" id="customCoinsList"></div>
+
+            <div class="crypto-holdings-add">
+              <div class="crypto-holdings-add-row">
+                <div class="form-group" style="flex:1;margin-bottom:0;">
+                  <label class="form-label" for="customCoinSymbol">シンボル</label>
+                  <input class="form-input" type="text" id="customCoinSymbol" placeholder="例: PEPE" style="text-transform:uppercase;">
+                </div>
+                <div class="form-group" style="flex:1;margin-bottom:0;">
+                  <label class="form-label" for="customCoinName">通貨名</label>
+                  <input class="form-input" type="text" id="customCoinName" placeholder="例: Pepe">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" for="customCoinColor">カラー</label>
+                  <input class="custom-coin-color-input" type="color" id="customCoinColor" value="#63b3ed">
+                </div>
+                <button type="button" class="btn btn-primary btn-sm crypto-holdings-add-btn" id="addCustomCoin">
+                  <i class="fa-solid fa-plus"></i> 登録
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

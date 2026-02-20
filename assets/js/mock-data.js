@@ -227,3 +227,8 @@ var MOCK_CRYPTO_HOLDINGS = [
   { symbol: 'SOL',  name: 'Solana',   quantity: 12 },
   { symbol: 'DOGE', name: 'Dogecoin',  quantity: 20000 }
 ];
+
+var MOCK_CUSTOM_COINS = [
+  { symbol: 'PEPE', name: 'Pepe', color: '#3cb043', price: 0.0018 },
+  { symbol: 'WLD',  name: 'Worldcoin', color: '#1a1a2e', price: 280 }
+];

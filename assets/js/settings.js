@@ -9,6 +9,7 @@
     initCategories();
     initThemeOptions();
     initToastActions();
+    initCustomCoins();
     initCryptoHoldings();
     renderCryptoAllocationChart();
     initPnlChart();
@@ -262,21 +263,45 @@
   }
 
   function findCoin(symbol) {
-    if (typeof MOCK_CRYPTO_ALL === 'undefined') return null;
-    for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
-      if (MOCK_CRYPTO_ALL[i].symbol === symbol) return MOCK_CRYPTO_ALL[i];
+    if (typeof MOCK_CRYPTO_ALL !== 'undefined') {
+      for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
+        if (MOCK_CRYPTO_ALL[i].symbol === symbol) return MOCK_CRYPTO_ALL[i];
+      }
+    }
+    if (typeof MOCK_CUSTOM_COINS !== 'undefined') {
+      for (var j = 0; j < MOCK_CUSTOM_COINS.length; j++) {
+        if (MOCK_CUSTOM_COINS[j].symbol === symbol) return MOCK_CUSTOM_COINS[j];
+      }
+    }
+    return null;
+  }
+
+  function findCoinColor(symbol) {
+    if (typeof MOCK_CUSTOM_COINS !== 'undefined') {
+      for (var i = 0; i < MOCK_CUSTOM_COINS.length; i++) {
+        if (MOCK_CUSTOM_COINS[i].symbol === symbol) return MOCK_CUSTOM_COINS[i].color;
+      }
     }
     return null;
   }
 
   function populateCurrencySelect() {
     var selectEl = document.getElementById('holdingCurrency');
-    if (!selectEl || typeof MOCK_CRYPTO_ALL === 'undefined') return;
+    if (!selectEl) return;
 
     var html = '<option value="">選択してください</option>';
-    for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
-      var coin = MOCK_CRYPTO_ALL[i];
-      html += '<option value="' + coin.symbol + '">' + coin.symbol + ' - ' + coin.name + '</option>';
+    if (typeof MOCK_CRYPTO_ALL !== 'undefined') {
+      for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
+        var coin = MOCK_CRYPTO_ALL[i];
+        html += '<option value="' + coin.symbol + '">' + coin.symbol + ' - ' + coin.name + '</option>';
+      }
+    }
+    if (typeof MOCK_CUSTOM_COINS !== 'undefined' && MOCK_CUSTOM_COINS.length > 0) {
+      html += '<option disabled>── カスタム通貨 ──</option>';
+      for (var j = 0; j < MOCK_CUSTOM_COINS.length; j++) {
+        var cc = MOCK_CUSTOM_COINS[j];
+        html += '<option value="' + cc.symbol + '">' + cc.symbol + ' - ' + cc.name + '</option>';
+      }
     }
     selectEl.innerHTML = html;
   }
@@ -298,8 +323,11 @@
       var valueJPY = h.quantity * priceJPY;
 
       // Display mode
+      var coinColor = findCoinColor(h.symbol);
+      var colorDot = coinColor ? '<span class="crypto-holding-dot" style="background:' + coinColor + ';"></span>' : '';
       html += '<div class="crypto-holding-item" data-index="' + i + '">' +
         '<div class="crypto-holding-display">' +
+          colorDot +
           '<span class="crypto-holding-symbol">' + h.symbol + '</span>' +
           '<span class="crypto-holding-name">' + h.name + '</span>' +
           '<span class="crypto-holding-qty font-mono">' + h.quantity + '</span>' +
@@ -381,14 +409,180 @@
   }
 
   function buildCoinOptions(selectedSymbol) {
-    if (typeof MOCK_CRYPTO_ALL === 'undefined') return '';
     var html = '';
-    for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
-      var coin = MOCK_CRYPTO_ALL[i];
-      var sel = coin.symbol === selectedSymbol ? ' selected' : '';
-      html += '<option value="' + coin.symbol + '"' + sel + '>' + coin.symbol + ' - ' + coin.name + '</option>';
+    if (typeof MOCK_CRYPTO_ALL !== 'undefined') {
+      for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
+        var coin = MOCK_CRYPTO_ALL[i];
+        var sel = coin.symbol === selectedSymbol ? ' selected' : '';
+        html += '<option value="' + coin.symbol + '"' + sel + '>' + coin.symbol + ' - ' + coin.name + '</option>';
+      }
+    }
+    if (typeof MOCK_CUSTOM_COINS !== 'undefined' && MOCK_CUSTOM_COINS.length > 0) {
+      html += '<option disabled>── カスタム通貨 ──</option>';
+      for (var j = 0; j < MOCK_CUSTOM_COINS.length; j++) {
+        var cc = MOCK_CUSTOM_COINS[j];
+        var sel2 = cc.symbol === selectedSymbol ? ' selected' : '';
+        html += '<option value="' + cc.symbol + '"' + sel2 + '>' + cc.symbol + ' - ' + cc.name + '</option>';
+      }
     }
     return html;
+  }
+
+  /* ---- Custom Coins ---- */
+  function initCustomCoins() {
+    renderCustomCoinsList();
+
+    var addBtn = document.getElementById('addCustomCoin');
+    if (addBtn) {
+      addBtn.addEventListener('click', function () {
+        var symbolEl = document.getElementById('customCoinSymbol');
+        var nameEl = document.getElementById('customCoinName');
+        var colorEl = document.getElementById('customCoinColor');
+        if (!symbolEl || !nameEl || !colorEl) return;
+
+        var symbol = symbolEl.value.trim().toUpperCase();
+        var name = nameEl.value.trim();
+        var color = colorEl.value;
+
+        if (!symbol || !name) {
+          showToast('シンボルと通貨名を入力してください');
+          return;
+        }
+
+        // Check duplicate in MOCK_CRYPTO_ALL
+        if (typeof MOCK_CRYPTO_ALL !== 'undefined') {
+          for (var i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
+            if (MOCK_CRYPTO_ALL[i].symbol === symbol) {
+              showToast('この通貨は既に標準リストに存在します');
+              return;
+            }
+          }
+        }
+
+        // Check duplicate in MOCK_CUSTOM_COINS
+        for (var j = 0; j < MOCK_CUSTOM_COINS.length; j++) {
+          if (MOCK_CUSTOM_COINS[j].symbol === symbol) {
+            showToast('この通貨は既に登録されています');
+            return;
+          }
+        }
+
+        MOCK_CUSTOM_COINS.push({ symbol: symbol, name: name, color: color, price: 0 });
+
+        symbolEl.value = '';
+        nameEl.value = '';
+        colorEl.value = '#63b3ed';
+
+        renderCustomCoinsList();
+        populateCurrencySelect();
+        showToast(symbol + ' を登録しました');
+      });
+    }
+  }
+
+  function renderCustomCoinsList() {
+    var container = document.getElementById('customCoinsList');
+    if (!container || typeof MOCK_CUSTOM_COINS === 'undefined') return;
+
+    if (MOCK_CUSTOM_COINS.length === 0) {
+      container.innerHTML = '<p class="settings-card-desc" style="text-align:center;padding:var(--space-4) 0;">カスタム通貨は登録されていません。</p>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < MOCK_CUSTOM_COINS.length; i++) {
+      var cc = MOCK_CUSTOM_COINS[i];
+      html += '<div class="custom-coin-item" data-index="' + i + '">' +
+        '<div class="custom-coin-display">' +
+          '<span class="custom-coin-dot" style="background:' + cc.color + ';"></span>' +
+          '<span class="custom-coin-symbol">' + cc.symbol + '</span>' +
+          '<span class="custom-coin-name">' + cc.name + '</span>' +
+          '<button class="settings-cat-btn edit" title="\u7de8\u96c6" data-index="' + i + '"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="settings-cat-btn delete" title="\u524a\u9664" data-index="' + i + '"><i class="fa-solid fa-xmark"></i></button>' +
+        '</div>' +
+        '<div class="custom-coin-edit" style="display:none;">' +
+          '<input class="form-input custom-coin-edit-symbol" type="text" value="' + cc.symbol + '" data-index="' + i + '" style="width:80px;text-transform:uppercase;">' +
+          '<input class="form-input custom-coin-edit-name" type="text" value="' + cc.name + '" data-index="' + i + '" style="flex:1;">' +
+          '<input class="custom-coin-color-input custom-coin-edit-color" type="color" value="' + cc.color + '" data-index="' + i + '">' +
+          '<button class="btn btn-primary btn-sm custom-coin-edit-save" data-index="' + i + '"><i class="fa-solid fa-check"></i></button>' +
+          '<button class="btn btn-secondary btn-sm custom-coin-edit-cancel" data-index="' + i + '"><i class="fa-solid fa-xmark"></i></button>' +
+        '</div>' +
+      '</div>';
+    }
+    container.innerHTML = html;
+
+    // Edit
+    container.querySelectorAll('.settings-cat-btn.edit').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = this.closest('.custom-coin-item');
+        item.querySelector('.custom-coin-display').style.display = 'none';
+        item.querySelector('.custom-coin-edit').style.display = 'flex';
+      });
+    });
+
+    // Cancel
+    container.querySelectorAll('.custom-coin-edit-cancel').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = this.closest('.custom-coin-item');
+        item.querySelector('.custom-coin-display').style.display = '';
+        item.querySelector('.custom-coin-edit').style.display = 'none';
+      });
+    });
+
+    // Save
+    container.querySelectorAll('.custom-coin-edit-save').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var index = parseInt(this.getAttribute('data-index'));
+        var item = this.closest('.custom-coin-item');
+        var newSymbol = item.querySelector('.custom-coin-edit-symbol').value.trim().toUpperCase();
+        var newName = item.querySelector('.custom-coin-edit-name').value.trim();
+        var newColor = item.querySelector('.custom-coin-edit-color').value;
+
+        if (!newSymbol || !newName) {
+          showToast('シンボルと通貨名を入力してください');
+          return;
+        }
+
+        // Duplicate check (excluding self)
+        for (var i = 0; i < MOCK_CUSTOM_COINS.length; i++) {
+          if (i !== index && MOCK_CUSTOM_COINS[i].symbol === newSymbol) {
+            showToast('この通貨は既に登録されています');
+            return;
+          }
+        }
+
+        var oldSymbol = MOCK_CUSTOM_COINS[index].symbol;
+        MOCK_CUSTOM_COINS[index].symbol = newSymbol;
+        MOCK_CUSTOM_COINS[index].name = newName;
+        MOCK_CUSTOM_COINS[index].color = newColor;
+
+        // Update holdings that use this coin
+        for (var h = 0; h < MOCK_CRYPTO_HOLDINGS.length; h++) {
+          if (MOCK_CRYPTO_HOLDINGS[h].symbol === oldSymbol) {
+            MOCK_CRYPTO_HOLDINGS[h].symbol = newSymbol;
+            MOCK_CRYPTO_HOLDINGS[h].name = newName;
+          }
+        }
+
+        renderCustomCoinsList();
+        populateCurrencySelect();
+        renderHoldingsList();
+        renderCryptoAllocationChart();
+        showToast(newSymbol + ' を更新しました');
+      });
+    });
+
+    // Delete
+    container.querySelectorAll('.settings-cat-btn.delete').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var index = parseInt(this.getAttribute('data-index'));
+        var removed = MOCK_CUSTOM_COINS.splice(index, 1);
+        renderCustomCoinsList();
+        populateCurrencySelect();
+        renderCryptoAllocationChart();
+        showToast((removed[0] ? removed[0].symbol : '') + ' を削除しました');
+      });
+    });
   }
 
   /* ---- Crypto Allocation Donut Chart ---- */
@@ -420,7 +614,8 @@
     var cumulative = 0;
     for (var k = 0; k < items.length; k++) {
       var pct = totalJPY > 0 ? (items[k].value / totalJPY) * 100 : 0;
-      var color = CHART_COLORS[k % CHART_COLORS.length];
+      var customColor = findCoinColor(items[k].symbol);
+      var color = customColor || CHART_COLORS[k % CHART_COLORS.length];
       items[k].color = color;
       items[k].pct = pct;
       gradientParts.push(color + ' ' + cumulative.toFixed(2) + '% ' + (cumulative + pct).toFixed(2) + '%');

@@ -538,6 +538,90 @@
   height: 42px;
 }
 
+/* ---- Custom Coins ---- */
+.custom-coins-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.custom-coin-item {
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.custom-coin-item:hover {
+  border-color: var(--border-secondary);
+}
+
+.custom-coin-display {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.custom-coin-edit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.custom-coin-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.custom-coin-symbol {
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  min-width: 48px;
+}
+
+.custom-coin-name {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-coin-color-input {
+  width: 42px;
+  height: 42px;
+  padding: 2px;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.custom-coin-color-input::-webkit-color-swatch-wrapper {
+  padding: 2px;
+}
+
+.custom-coin-color-input::-webkit-color-swatch {
+  border: none;
+  border-radius: var(--radius-sm);
+}
+
+/* Holding color dot */
+.crypto-holding-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 /* ---- Donut Chart ---- */
 .crypto-donut-wrapper {
   display: flex;
