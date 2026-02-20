@@ -11,6 +11,7 @@
     initToastActions();
     initCryptoHoldings();
     renderCryptoAllocationChart();
+    initPnlChart();
   });
 
   /* ---- Tab Navigation ---- */
@@ -459,6 +460,178 @@
     html += '</div>';
 
     container.innerHTML = html;
+  }
+
+  /* ---- P&L Area Chart ---- */
+  function initPnlChart() {
+    var tabs = document.querySelectorAll('.pnl-period-tab');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        renderPnlChart(parseInt(this.getAttribute('data-period')));
+      });
+    });
+    renderPnlChart(7);
+  }
+
+  function getPnlData(days) {
+    if (typeof MOCK_CALENDAR === 'undefined') return [];
+    var today = new Date(2026, 1, 20);
+    var data = [];
+    for (var i = days - 1; i >= 0; i--) {
+      var d = new Date(today);
+      d.setDate(d.getDate() - i);
+      var ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+      var day = d.getDate();
+      var pnl = 0;
+      if (MOCK_CALENDAR[ym] && MOCK_CALENDAR[ym][day]) {
+        pnl = MOCK_CALENDAR[ym][day].total;
+      }
+      data.push({
+        dateStr: String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'),
+        pnl: pnl
+      });
+    }
+    return data;
+  }
+
+  function renderPnlChart(period) {
+    var container = document.getElementById('pnlChartArea');
+    var summaryEl = document.getElementById('pnlSummaryRow');
+    if (!container) return;
+
+    var data = getPnlData(period);
+    if (data.length === 0) { container.innerHTML = ''; return; }
+
+    // Cumulative P&L
+    var cumVals = [];
+    var sum = 0;
+    for (var i = 0; i < data.length; i++) {
+      sum += data[i].pnl;
+      cumVals.push(sum);
+    }
+
+    // Summary stats
+    var todayPnl = data[data.length - 1].pnl;
+    var sevenSum = 0;
+    var thirtySum = 0;
+    var allData30 = getPnlData(30);
+    for (var j = 0; j < allData30.length; j++) {
+      thirtySum += allData30[j].pnl;
+      if (j >= allData30.length - 7) sevenSum += allData30[j].pnl;
+    }
+
+    if (summaryEl) {
+      summaryEl.innerHTML =
+        '<div class="pnl-summary-item">' +
+          '<div class="pnl-summary-label">\u4eca\u65e5\u306e\u640d\u76ca</div>' +
+          '<div class="pnl-summary-value ' + (todayPnl >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(todayPnl) + '</div>' +
+        '</div>' +
+        '<div class="pnl-summary-item">' +
+          '<div class="pnl-summary-label">7\u65e5\u9593\u306e\u640d\u76ca\u984d</div>' +
+          '<div class="pnl-summary-value ' + (sevenSum >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(sevenSum) + '</div>' +
+        '</div>' +
+        '<div class="pnl-summary-item">' +
+          '<div class="pnl-summary-label">30\u65e5\u9593\u640d\u76ca</div>' +
+          '<div class="pnl-summary-value ' + (thirtySum >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(thirtySum) + '</div>' +
+        '</div>';
+    }
+
+    // Chart label & value
+    var totalPnl = cumVals[cumVals.length - 1];
+    var chartColor = totalPnl >= 0 ? '#63b3ed' : '#ef4444';
+
+    // SVG dimensions
+    var W = 480, H = 220;
+    var PL = 56, PR = 16, PT = 16, PB = 28;
+    var cW = W - PL - PR;
+    var cH = H - PT - PB;
+
+    var maxV = Math.max.apply(null, cumVals);
+    var minV = Math.min.apply(null, cumVals);
+    var range = maxV - minV;
+    if (range === 0) range = 1;
+    maxV += range * 0.1;
+    minV -= range * 0.1;
+    range = maxV - minV;
+
+    function mx(idx) { return PL + (idx / Math.max(cumVals.length - 1, 1)) * cW; }
+    function my(val) { return PT + (1 - (val - minV) / range) * cH; }
+
+    // Build smooth path (Catmull-Rom to Bezier)
+    var pts = [];
+    for (var k = 0; k < cumVals.length; k++) {
+      pts.push({ x: mx(k), y: my(cumVals[k]) });
+    }
+
+    var linePath = '';
+    if (pts.length === 1) {
+      linePath = 'M' + pts[0].x + ',' + pts[0].y;
+    } else {
+      linePath = 'M' + pts[0].x + ',' + pts[0].y;
+      for (var s = 0; s < pts.length - 1; s++) {
+        var p0 = pts[Math.max(0, s - 1)];
+        var p1 = pts[s];
+        var p2 = pts[s + 1];
+        var p3 = pts[Math.min(pts.length - 1, s + 2)];
+        var cp1x = p1.x + (p2.x - p0.x) / 6;
+        var cp1y = p1.y + (p2.y - p0.y) / 6;
+        var cp2x = p2.x - (p3.x - p1.x) / 6;
+        var cp2y = p2.y - (p3.y - p1.y) / 6;
+        linePath += ' C' + cp1x.toFixed(1) + ',' + cp1y.toFixed(1) + ' ' + cp2x.toFixed(1) + ',' + cp2y.toFixed(1) + ' ' + p2.x.toFixed(1) + ',' + p2.y.toFixed(1);
+      }
+    }
+
+    var bottomY = PT + cH;
+    var areaPath = linePath + ' L' + pts[pts.length - 1].x.toFixed(1) + ',' + bottomY + ' L' + pts[0].x.toFixed(1) + ',' + bottomY + ' Z';
+
+    // Grid lines (5 levels)
+    var gridSvg = '';
+    for (var g = 0; g <= 4; g++) {
+      var yVal = minV + (range * g / 4);
+      var yPos = my(yVal);
+      gridSvg += '<line x1="' + PL + '" y1="' + yPos.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + yPos.toFixed(1) + '" stroke="var(--border-primary)" stroke-width="0.5" stroke-dasharray="4,2"/>';
+      var lbl = Math.abs(yVal) >= 10000 ? (yVal / 10000).toFixed(1) + '\u4e07' : Math.round(yVal).toLocaleString();
+      gridSvg += '<text x="' + (PL - 6) + '" y="' + (yPos + 3).toFixed(1) + '" text-anchor="end" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">' + lbl + '</text>';
+    }
+
+    // Zero line
+    if (minV < 0 && maxV > 0) {
+      var zy = my(0);
+      gridSvg += '<line x1="' + PL + '" y1="' + zy.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + zy.toFixed(1) + '" stroke="var(--text-tertiary)" stroke-width="0.5" stroke-opacity="0.5"/>';
+    }
+
+    // X-axis labels
+    var xSvg = '';
+    xSvg += '<text x="' + mx(0).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="start" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">' + data[0].dateStr + '</text>';
+    xSvg += '<text x="' + mx(data.length - 1).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="end" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">' + data[data.length - 1].dateStr + '</text>';
+
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="pnl-chart-svg" preserveAspectRatio="xMidYMid meet">' +
+      '<defs>' +
+        '<linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="' + chartColor + '" stop-opacity="0.3"/>' +
+          '<stop offset="100%" stop-color="' + chartColor + '" stop-opacity="0.02"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      gridSvg +
+      '<path d="' + areaPath + '" fill="url(#pnlGrad)"/>' +
+      '<path d="' + linePath + '" fill="none" stroke="' + chartColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      xSvg +
+    '</svg>';
+
+    // Chart header with total
+    var headerHtml = '<div class="pnl-chart-header">' +
+      '<span class="pnl-chart-label">\u640d\u76ca</span>' +
+      '<span class="pnl-chart-total ' + (totalPnl >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(totalPnl) + '</span>' +
+    '</div>';
+
+    container.innerHTML = headerHtml + svg;
+  }
+
+  function formatPnlJPY(val) {
+    var prefix = val >= 0 ? '+' : '';
+    return prefix + new Intl.NumberFormat('ja-JP').format(val) + ' JPY';
   }
 
   /* ---- Toast ---- */
