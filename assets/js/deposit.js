@@ -1,29 +1,17 @@
 /**
  * Deposit - 口座入出金管理
- * Month navigation, KPI cards, table rendering, add entry modal
+ * Uses API: GET/POST/PUT/DELETE /api/deposits
  */
 (function () {
-  var currentYear = 2026;
-  var currentMonth = 2;
-  var nextId = 100;
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1;
 
   document.addEventListener('DOMContentLoaded', function () {
-    calcNextId();
     renderPage();
     initNavigation();
     initModal();
   });
-
-  /* ---- Calculate next available ID ---- */
-  function calcNextId() {
-    var maxId = 0;
-    for (var i = 0; i < MOCK_DEPOSITS.length; i++) {
-      if (MOCK_DEPOSITS[i].id > maxId) {
-        maxId = MOCK_DEPOSITS[i].id;
-      }
-    }
-    nextId = maxId + 1;
-  }
 
   /* ---- Navigation ---- */
   function initNavigation() {
@@ -44,69 +32,68 @@
   function renderPage() {
     document.getElementById('depTitle').textContent = currentYear + '年' + currentMonth + '月';
 
-    var entries = getMonthEntries();
-    var stats = calcStats(entries);
-
-    renderKpi(stats);
-    renderTable(entries);
+    apiFetch('/api/deposits?year=' + currentYear + '&month=' + currentMonth)
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (data) {
+        renderKpi({
+          balance: data.balance,
+          monthDeposits: data.monthDeposits,
+          monthWithdrawals: data.monthWithdrawals,
+          monthDepositCount: 0,
+          monthWithdrawalCount: 0
+        });
+        renderTable(data.records || []);
+      })
+      .catch(function () {
+        renderFromMock();
+      });
   }
 
-  /* ---- Filter entries for current month ---- */
-  function getMonthEntries() {
+  /* ---- Mock fallback ---- */
+  function renderFromMock() {
+    if (typeof MOCK_DEPOSITS === 'undefined') {
+      renderKpi({ balance: 0, monthDeposits: 0, monthWithdrawals: 0, monthDepositCount: 0, monthWithdrawalCount: 0 });
+      renderTable([]);
+      return;
+    }
+
     var mm = currentMonth < 10 ? '0' + currentMonth : '' + currentMonth;
     var key = currentYear + '-' + mm;
-    var result = [];
+    var entries = [];
 
     for (var i = 0; i < MOCK_DEPOSITS.length; i++) {
       var entry = MOCK_DEPOSITS[i];
       if (entry.date.substring(0, 7) === key) {
-        result.push(entry);
+        entries.push(entry);
       }
     }
 
-    result.sort(function (a, b) {
+    entries.sort(function (a, b) {
       if (a.date > b.date) return -1;
       if (a.date < b.date) return 1;
       return b.id - a.id;
     });
 
-    return result;
-  }
-
-  /* ---- Calculate summary stats ---- */
-  function calcStats(entries) {
-    var monthDeposits = 0;
-    var monthWithdrawals = 0;
-    var monthDepositCount = 0;
-    var monthWithdrawalCount = 0;
-
-    for (var i = 0; i < entries.length; i++) {
-      if (entries[i].type === 'deposit') {
-        monthDeposits += entries[i].amount;
-        monthDepositCount++;
-      } else {
-        monthWithdrawals += entries[i].amount;
-        monthWithdrawalCount++;
-      }
+    var monthDeposits = 0, monthWithdrawals = 0;
+    for (var j = 0; j < entries.length; j++) {
+      if (entries[j].type === 'deposit') monthDeposits += entries[j].amount;
+      else monthWithdrawals += entries[j].amount;
     }
 
-    var totalDeposits = 0;
-    var totalWithdrawals = 0;
-    for (var j = 0; j < MOCK_DEPOSITS.length; j++) {
-      if (MOCK_DEPOSITS[j].type === 'deposit') {
-        totalDeposits += MOCK_DEPOSITS[j].amount;
-      } else {
-        totalWithdrawals += MOCK_DEPOSITS[j].amount;
-      }
+    var totalDeposits = 0, totalWithdrawals = 0;
+    for (var k = 0; k < MOCK_DEPOSITS.length; k++) {
+      if (MOCK_DEPOSITS[k].type === 'deposit') totalDeposits += MOCK_DEPOSITS[k].amount;
+      else totalWithdrawals += MOCK_DEPOSITS[k].amount;
     }
 
-    return {
+    renderKpi({
       balance: totalDeposits - totalWithdrawals,
       monthDeposits: monthDeposits,
       monthWithdrawals: monthWithdrawals,
-      monthDepositCount: monthDepositCount,
-      monthWithdrawalCount: monthWithdrawalCount
-    };
+      monthDepositCount: 0,
+      monthWithdrawalCount: 0
+    });
+    renderTable(entries);
   }
 
   /* ---- Render KPI Cards ---- */
@@ -129,14 +116,14 @@
         value: new Intl.NumberFormat('ja-JP').format(stats.monthDeposits) + '円',
         cls: 'text-profit',
         label: '入金合計',
-        sub: stats.monthDepositCount + '件'
+        sub: ''
       },
       {
         icon: '<i class="fa-solid fa-arrow-up"></i>',
         value: new Intl.NumberFormat('ja-JP').format(stats.monthWithdrawals) + '円',
         cls: 'text-loss',
         label: '出金合計',
-        sub: stats.monthWithdrawalCount + '件'
+        sub: ''
       }
     ];
 
@@ -179,8 +166,8 @@
         '<td class="dep-td dep-td-date">' + formatDate(e.date) + '</td>' +
         '<td class="dep-td"><span class="' + typeBadge + '">' + typeLabel + '</span></td>' +
         '<td class="dep-td dep-td-amount ' + amountClass + '">' + amountSign + formatAmount(e.amount) + '</td>' +
-        '<td class="dep-td">' + getAccountName(e.account) + '</td>' +
-        '<td class="dep-td">' + getMethodName(e.method) + '</td>' +
+        '<td class="dep-td">' + (e.account || '-') + '</td>' +
+        '<td class="dep-td">' + (e.method || '-') + '</td>' +
         '<td class="dep-td dep-td-memo">' + (e.memo || '-') + '</td>' +
       '</tr>';
     }
@@ -188,20 +175,6 @@
   }
 
   /* ---- Helpers ---- */
-  function getAccountName(id) {
-    for (var i = 0; i < MOCK_ACCOUNTS.length; i++) {
-      if (MOCK_ACCOUNTS[i].id === id) return MOCK_ACCOUNTS[i].name;
-    }
-    return id;
-  }
-
-  function getMethodName(id) {
-    for (var i = 0; i < MOCK_METHODS.length; i++) {
-      if (MOCK_METHODS[i].id === id) return MOCK_METHODS[i].name;
-    }
-    return id;
-  }
-
   function formatDate(dateStr) {
     var parts = dateStr.split('-');
     return parseInt(parts[1], 10) + '/' + parseInt(parts[2], 10);
@@ -250,16 +223,6 @@
     var dayStr = dd < 10 ? '0' + dd : '' + dd;
     var today = currentYear + '-' + mm + '-' + dayStr;
 
-    var accountOptions = '<option value="">選択してください</option>';
-    for (var i = 0; i < MOCK_ACCOUNTS.length; i++) {
-      accountOptions += '<option value="' + MOCK_ACCOUNTS[i].id + '">' + MOCK_ACCOUNTS[i].name + '</option>';
-    }
-
-    var methodOptions = '<option value="">選択してください</option>';
-    for (var j = 0; j < MOCK_METHODS.length; j++) {
-      methodOptions += '<option value="' + MOCK_METHODS[j].id + '">' + MOCK_METHODS[j].name + '</option>';
-    }
-
     var html = '<div class="dep-form">' +
       '<div class="form-group">' +
         '<label class="form-label">種別</label>' +
@@ -281,11 +244,11 @@
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label" for="depAccount">口座</label>' +
-        '<select class="form-input" id="depAccount">' + accountOptions + '</select>' +
+        '<input type="text" class="form-input" id="depAccount" placeholder="例: SBI証券、楽天銀行">' +
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label" for="depMethod">方法</label>' +
-        '<select class="form-input" id="depMethod">' + methodOptions + '</select>' +
+        '<input type="text" class="form-input" id="depMethod" placeholder="例: 銀行振込、クレジットカード">' +
       '</div>' +
       '<div class="form-group">' +
         '<label class="form-label" for="depMemo">メモ</label>' +
@@ -325,28 +288,45 @@
     var type = activeBtn ? activeBtn.getAttribute('data-type') : 'deposit';
 
     var date = document.getElementById('depDate').value;
-    var amount = parseFloat(document.getElementById('depAmount').value) || 0;
-    var account = document.getElementById('depAccount').value;
-    var method = document.getElementById('depMethod').value;
-    var memo = document.getElementById('depMemo').value;
+    var amount = parseInt(document.getElementById('depAmount').value) || 0;
+    var account = document.getElementById('depAccount').value.trim();
+    var method = document.getElementById('depMethod').value.trim();
+    var memo = document.getElementById('depMemo').value.trim();
 
     if (!date || amount <= 0 || !account || !method) {
       return;
     }
 
-    var newEntry = {
-      id: nextId++,
+    var body = {
       date: date,
       type: type,
       amount: amount,
       account: account,
       method: method,
-      memo: memo
+      memo: memo || null
     };
 
-    MOCK_DEPOSITS.push(newEntry);
-
-    closeModal();
-    renderPage();
+    apiFetch('/api/deposits', { method: 'POST', body: body })
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function () {
+        closeModal();
+        renderPage();
+      })
+      .catch(function () {
+        // Fallback: add to mock data
+        if (typeof MOCK_DEPOSITS !== 'undefined') {
+          MOCK_DEPOSITS.push({
+            id: Date.now(),
+            date: date,
+            type: type,
+            amount: amount,
+            account: account,
+            method: method,
+            memo: memo
+          });
+        }
+        closeModal();
+        renderPage();
+      });
   }
 })();

@@ -6,14 +6,11 @@
     renderNews();
   });
 
-  function renderNews() {
-    var container = document.getElementById('cryptoNewsList');
-    if (!container || typeof MOCK_CRYPTO_NEWS_ALL === 'undefined') return;
-
+  function renderItems(container, data) {
     var html = '';
-    for (var i = 0; i < MOCK_CRYPTO_NEWS_ALL.length; i++) {
-      var n = MOCK_CRYPTO_NEWS_ALL[i];
-      html += '<a href="' + n.url + '" class="cnews-item">' +
+    for (var i = 0; i < data.length; i++) {
+      var n = data[i];
+      html += '<a href="' + n.url + '" class="cnews-item" target="_blank" rel="noopener noreferrer">' +
         '<div class="cnews-item-body">' +
           '<div class="cnews-title-text">' + n.title + '</div>' +
           '<div class="cnews-excerpt">' + n.excerpt + '</div>' +
@@ -25,5 +22,26 @@
       '</a>';
     }
     container.innerHTML = html;
+  }
+
+  function renderNews() {
+    var container = document.getElementById('cryptoNewsList');
+    if (!container) return;
+
+    fetch('/api/crypto/news', {
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function (json) {
+      renderItems(container, json.data);
+    })
+    .catch(function () {
+      if (typeof MOCK_CRYPTO_NEWS_ALL !== 'undefined') {
+        renderItems(container, MOCK_CRYPTO_NEWS_ALL);
+      }
+    });
   }
 })();

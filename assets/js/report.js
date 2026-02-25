@@ -1,15 +1,18 @@
 /**
  * Report - Monthly, Yearly, and Lifetime views
  * KPI cards, charts, category breakdown, summaries, rankings, goal progress
+ * Uses API: GET /api/pnl/report, GET /api/pnl/categories, GET /api/goals
  */
 (function () {
+  var now = new Date();
   var currentPeriod = 'monthly';
-  var currentYear = 2026;
-  var currentMonth = 2;
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1;
+  var reportCategories = [];
 
   document.addEventListener('DOMContentLoaded', function () {
     startClock();
-    // Check URL param for initial period (e.g. report.html?period=yearly)
+    // Check URL param for initial period
     var urlParams = new URLSearchParams(window.location.search);
     var paramPeriod = urlParams.get('period');
     if (paramPeriod && (paramPeriod === 'monthly' || paramPeriod === 'yearly' || paramPeriod === 'lifetime')) {
@@ -22,7 +25,14 @@
     }
     initPeriodTabs();
     initNavigation();
-    renderReport();
+    // Fetch categories first, then render
+    apiFetch('/api/pnl/categories')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (cats) { reportCategories = cats; })
+      .catch(function () {
+        reportCategories = (typeof MOCK_CATEGORIES !== 'undefined') ? MOCK_CATEGORIES : [];
+      })
+      .then(function () { renderReport(); });
   });
 
   // Expose period switch for sidebar links
@@ -45,14 +55,14 @@
     var weekdays = ['日', '月', '火', '水', '木', '金', '土'];
 
     function update() {
-      var now = new Date();
-      var y = now.getFullYear();
-      var m = now.getMonth() + 1;
-      var d = now.getDate();
-      var w = weekdays[now.getDay()];
-      var hh = String(now.getHours()).padStart(2, '0');
-      var mm = String(now.getMinutes()).padStart(2, '0');
-      var ss = String(now.getSeconds()).padStart(2, '0');
+      var n = new Date();
+      var y = n.getFullYear();
+      var m = n.getMonth() + 1;
+      var d = n.getDate();
+      var w = weekdays[n.getDay()];
+      var hh = String(n.getHours()).padStart(2, '0');
+      var mm = String(n.getMinutes()).padStart(2, '0');
+      var ss = String(n.getSeconds()).padStart(2, '0');
 
       el.innerHTML =
         '<span class="nav-datetime-date">' + y + '/' + m + '/' + d + '(' + w + ')</span>' +
@@ -111,6 +121,13 @@
     if (el) el.style.display = visible ? '' : 'none';
   }
 
+  function getCatById(id) {
+    for (var i = 0; i < reportCategories.length; i++) {
+      if (reportCategories[i].id === id || reportCategories[i].id === String(id)) return reportCategories[i];
+    }
+    return null;
+  }
+
   /* ---- Main Render Dispatcher ---- */
   function renderReport() {
     var titleEl = document.getElementById('reportTitle');
@@ -119,24 +136,102 @@
     if (currentPeriod === 'monthly') {
       titleEl.textContent = currentYear + '年' + currentMonth + '月';
       navBtns.forEach(function (b) { b.style.visibility = 'visible'; });
-      renderMonthly();
     } else if (currentPeriod === 'yearly') {
       titleEl.textContent = currentYear + '年';
       navBtns.forEach(function (b) { b.style.visibility = 'visible'; });
-      renderYearly();
     } else {
       titleEl.textContent = '全期間';
       navBtns.forEach(function (b) { b.style.visibility = 'hidden'; });
-      renderLifetime();
     }
+
+    var url = '/api/pnl/report?period=' + currentPeriod;
+    if (currentPeriod === 'monthly') {
+      url += '&year=' + currentYear + '&month=' + currentMonth;
+    } else if (currentPeriod === 'yearly') {
+      url += '&year=' + currentYear;
+    }
+
+    apiFetch(url)
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (apiData) {
+        if (currentPeriod === 'monthly') {
+          renderMonthlyFromApi(apiData);
+        } else if (currentPeriod === 'yearly') {
+          renderYearlyFromApi(apiData);
+        } else {
+          renderLifetimeFromApi(apiData);
+        }
+      })
+      .catch(function () {
+        // Fallback to mock data
+        if (currentPeriod === 'monthly') {
+          renderMonthlyMock();
+        } else if (currentPeriod === 'yearly') {
+          renderYearlyMock();
+        } else {
+          renderLifetimeMock();
+        }
+      });
   }
 
   /* ================================================================
-     MONTHLY VIEW
+     MONTHLY VIEW (API)
      ================================================================ */
-  function renderMonthly() {
+  function renderMonthlyFromApi(apiData) {
+    setTitle('chartTitle', '日次損益推移');
+    setTitle('summaryTitle', '週別サマリー');
+    setTitle('bestTitle', 'ベスト3');
+    setTitle('worstTitle', 'ワースト3');
+    setTitle('goalTitle', '年間目標への進捗');
+    showEl('summarySection', true);
+    showEl('goalSection', true);
+
+    // Build data structures from API response
+    var data = {};
+    var entries = [];
+    for (var i = 0; i < apiData.chartData.length; i++) {
+      var cd = apiData.chartData[i];
+      var day = parseInt(cd.label);
+      if (cd.value !== 0) {
+        data[day] = { total: cd.value, categories: [], comment: '' };
+        entries.push({ day: day, total: cd.value, comment: '' });
+      }
+    }
+    entries.sort(function (a, b) { return a.day - b.day; });
+
+    var kpi = apiData.kpi;
+    var stats = {
+      totalPnl: kpi.total,
+      winDays: kpi.winDays,
+      lossDays: kpi.lossDays,
+      tradeDays: kpi.tradeDays,
+      maxWin: kpi.maxWin,
+      maxLoss: kpi.maxLoss,
+      avgPnl: kpi.avgDaily,
+      winRate: Math.round(kpi.winRate),
+      catTotals: apiData.categoryTotals,
+      entries: entries
+    };
+
+    renderMonthlyKpi(stats);
+    renderDailyChart(data, stats);
+    renderCategoryBreakdown(stats.catTotals);
+
+    // Weekly summary from API
+    var weeklyPnl = apiData.weeklyPnl || {};
+    renderWeeklySummaryFromData(weeklyPnl);
+
+    // Best/worst from API
+    renderMonthlyBestWorstFromApi(apiData.best3, apiData.worst3);
+    renderGoalProgress();
+  }
+
+  /* ================================================================
+     MONTHLY VIEW (Mock fallback)
+     ================================================================ */
+  function renderMonthlyMock() {
     var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
-    var data = MOCK_CALENDAR[key] || {};
+    var data = (typeof MOCK_CALENDAR !== 'undefined') ? MOCK_CALENDAR[key] || {} : {};
     var stats = calcMonthStats(data);
 
     setTitle('chartTitle', '日次損益推移');
@@ -315,6 +410,43 @@
     container.innerHTML = html;
   }
 
+  function renderWeeklySummaryFromData(weeklyPnl) {
+    var container = document.getElementById('reportSummary');
+    if (!container) return;
+
+    var daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+    var weeks = [];
+    var weekNum = 1;
+    var weekStart = 1;
+
+    for (var day = 1; day <= daysInMonth; day++) {
+      var dayOfWeek = new Date(currentYear, currentMonth - 1, day).getDay();
+      if (dayOfWeek === 6 || day === daysInMonth) {
+        weeks.push({ num: weekNum, start: weekStart, end: day });
+        weekNum++;
+        weekStart = day + 1;
+      }
+    }
+
+    var html = '';
+    for (var w = 0; w < weeks.length; w++) {
+      var week = weeks[w];
+      var weekTotal = weeklyPnl[week.num] || 0;
+      var hasData = weeklyPnl[week.num] !== undefined;
+
+      var amtClass = weekTotal >= 0 ? 'text-profit' : 'text-loss';
+      if (!hasData) amtClass = 'text-muted';
+
+      html += '<div class="report-week-item">' +
+        '<div><div class="report-week-label">第' + week.num + '週</div>' +
+        '<div class="report-week-dates">' + currentMonth + '/' + week.start + ' - ' + currentMonth + '/' + week.end + '</div></div>' +
+        '<div style="text-align: right;"><div class="report-week-amount ' + amtClass + '">' + (hasData ? formatYen(weekTotal) : '---') + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    container.innerHTML = html;
+  }
+
   function renderMonthlyBestWorst(stats) {
     var bestContainer = document.getElementById('bestItems');
     var worstContainer = document.getElementById('worstItems');
@@ -326,45 +458,111 @@
     var worst = entries.filter(function (e) { return e.total < 0; })
       .sort(function (a, b) { return a.total - b.total; }).slice(0, 3);
 
-    if (bestContainer) {
-      if (best.length === 0) {
-        bestContainer.innerHTML = '<div class="report-rank-empty">利益日がありません</div>';
-      } else {
-        var html = '';
-        for (var i = 0; i < best.length; i++) {
-          html += '<div class="report-rank-item">' +
-            '<span class="report-rank-num ' + rankClasses[i] + '">' + (i + 1) + '</span>' +
-            '<span class="report-rank-date">' + currentMonth + '/' + best[i].day + '</span>' +
-            '<span class="report-rank-comment">' + (best[i].comment || '') + '</span>' +
-            '<span class="report-rank-amount text-profit">' + formatYen(best[i].total) + '</span>' +
-          '</div>';
-        }
-        bestContainer.innerHTML = html;
-      }
+    renderBestWorstDays(bestContainer, best, rankClasses, 'profit', '利益日がありません');
+    renderBestWorstDays(worstContainer, worst, rankClasses, 'loss', '損失日がありません');
+  }
+
+  function renderMonthlyBestWorstFromApi(best3, worst3) {
+    var bestContainer = document.getElementById('bestItems');
+    var worstContainer = document.getElementById('worstItems');
+    var rankClasses = ['gold', 'silver', 'bronze'];
+
+    // Convert API {day: amount} to sorted entries
+    var best = objectToEntries(best3, true);
+    var worst = objectToEntries(worst3, false);
+
+    renderBestWorstDays(bestContainer, best, rankClasses, 'profit', '利益日がありません');
+    renderBestWorstDays(worstContainer, worst, rankClasses, 'loss', '損失日がありません');
+  }
+
+  function objectToEntries(obj, descending) {
+    var entries = [];
+    for (var key in obj) {
+      entries.push({ day: parseInt(key), total: obj[key], comment: '' });
+    }
+    entries.sort(function (a, b) {
+      return descending ? b.total - a.total : a.total - b.total;
+    });
+    return entries.slice(0, 3);
+  }
+
+  function renderBestWorstDays(container, items, rankClasses, type, emptyText) {
+    if (!container) return;
+
+    if (items.length === 0) {
+      container.innerHTML = '<div class="report-rank-empty">' + emptyText + '</div>';
+      return;
     }
 
-    if (worstContainer) {
-      if (worst.length === 0) {
-        worstContainer.innerHTML = '<div class="report-rank-empty">損失日がありません</div>';
-      } else {
-        var html2 = '';
-        for (var j = 0; j < worst.length; j++) {
-          html2 += '<div class="report-rank-item">' +
-            '<span class="report-rank-num ' + rankClasses[j] + '">' + (j + 1) + '</span>' +
-            '<span class="report-rank-date">' + currentMonth + '/' + worst[j].day + '</span>' +
-            '<span class="report-rank-comment">' + (worst[j].comment || '') + '</span>' +
-            '<span class="report-rank-amount text-loss">' + formatYen(worst[j].total) + '</span>' +
-          '</div>';
-        }
-        worstContainer.innerHTML = html2;
-      }
+    var textClass = type === 'profit' ? 'text-profit' : 'text-loss';
+    var html = '';
+    for (var i = 0; i < items.length; i++) {
+      html += '<div class="report-rank-item">' +
+        '<span class="report-rank-num ' + rankClasses[i] + '">' + (i + 1) + '</span>' +
+        '<span class="report-rank-date">' + currentMonth + '/' + items[i].day + '</span>' +
+        '<span class="report-rank-comment">' + (items[i].comment || '') + '</span>' +
+        '<span class="report-rank-amount ' + textClass + '">' + formatYen(items[i].total) + '</span>' +
+      '</div>';
     }
+    container.innerHTML = html;
   }
 
   /* ================================================================
-     YEARLY VIEW
+     YEARLY VIEW (API)
      ================================================================ */
-  function renderYearly() {
+  function renderYearlyFromApi(apiData) {
+    setTitle('chartTitle', '月次損益推移');
+    setTitle('summaryTitle', '四半期サマリー');
+    setTitle('bestTitle', 'ベスト3（月）');
+    setTitle('worstTitle', 'ワースト3（月）');
+    setTitle('goalTitle', '年間目標への進捗');
+    showEl('summarySection', true);
+    showEl('goalSection', true);
+
+    var kpi = apiData.kpi;
+    var monthlyEntries = [];
+    for (var i = 0; i < apiData.chartData.length; i++) {
+      var cd = apiData.chartData[i];
+      var m = parseInt(cd.label);
+      monthlyEntries.push({ label: m + '月', total: cd.value, tradeDays: 0, month: m });
+    }
+
+    var activeEntries = monthlyEntries.filter(function (e) { return e.total !== 0; });
+    var lossMonths = activeEntries.filter(function (e) { return e.total < 0; }).length;
+
+    var stats = {
+      totalPnl: kpi.total,
+      winDays: kpi.winDays || 0,
+      lossDays: (kpi.tradeDays || 0) - (kpi.winDays || 0),
+      tradeDays: kpi.tradeDays || 0,
+      winMonths: kpi.winMonths || 0,
+      lossMonths: lossMonths,
+      activeMonths: kpi.totalMonths || activeEntries.length,
+      avgMonthPnl: kpi.avgMonthly || 0,
+      maxWin: kpi.maxWin || 0,
+      maxLoss: kpi.maxLoss || 0,
+      winRate: Math.round(kpi.winRate || 0),
+      catTotals: apiData.categoryTotals,
+      monthlyEntries: monthlyEntries
+    };
+
+    renderYearlyKpi(stats);
+    renderMonthlyChart(stats);
+    renderCategoryBreakdown(stats.catTotals);
+
+    // Quarterly summary from API
+    var quarterlyPnl = apiData.quarterlyPnl || {};
+    renderQuarterlySummaryFromApi(quarterlyPnl);
+
+    // Best/worst months from API
+    renderBestWorstMonthsFromApi(apiData.best3, apiData.worst3);
+    renderGoalProgress();
+  }
+
+  /* ================================================================
+     YEARLY VIEW (Mock fallback)
+     ================================================================ */
+  function renderYearlyMock() {
     var stats = calcYearStats(currentYear);
 
     setTitle('chartTitle', '月次損益推移');
@@ -390,7 +588,7 @@
 
     for (var m = 1; m <= 12; m++) {
       var key = year + '-' + String(m).padStart(2, '0');
-      var data = MOCK_CALENDAR[key];
+      var data = (typeof MOCK_CALENDAR !== 'undefined') ? MOCK_CALENDAR[key] : null;
       if (!data) continue;
 
       var monthTotal = 0, mTrade = 0;
@@ -483,7 +681,7 @@
       var entry = monthMap[m];
       html += '<div class="report-bar-col">';
 
-      if (entry) {
+      if (entry && entry.total !== 0) {
         var pnlClass = entry.total >= 0 ? 'profit' : 'loss';
         var barPct = Math.round((Math.abs(entry.total) / maxAbs) * halfHeight);
         if (barPct < 2) barPct = 2;
@@ -553,10 +751,115 @@
     container.innerHTML = html;
   }
 
+  function renderQuarterlySummaryFromApi(quarterlyPnl) {
+    var container = document.getElementById('reportSummary');
+    if (!container) return;
+
+    var quarters = [
+      { name: 'Q1（1-3月）', key: 1 },
+      { name: 'Q2（4-6月）', key: 2 },
+      { name: 'Q3（7-9月）', key: 3 },
+      { name: 'Q4（10-12月）', key: 4 }
+    ];
+
+    var html = '';
+    for (var q = 0; q < quarters.length; q++) {
+      var quarter = quarters[q];
+      var qTotal = quarterlyPnl[quarter.key] || 0;
+      var hasData = quarterlyPnl[quarter.key] !== undefined;
+
+      var amtClass = qTotal >= 0 ? 'text-profit' : 'text-loss';
+      if (!hasData) amtClass = 'text-muted';
+
+      html += '<div class="report-week-item">' +
+        '<div><div class="report-week-label">' + quarter.name + '</div></div>' +
+        '<div style="text-align: right;"><div class="report-week-amount ' + amtClass + '">' + (hasData ? formatYen(qTotal) : '---') + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function renderBestWorstMonthsFromApi(best3, worst3) {
+    var bestContainer = document.getElementById('bestItems');
+    var worstContainer = document.getElementById('worstItems');
+    var rankClasses = ['gold', 'silver', 'bronze'];
+
+    var best = [];
+    for (var bk in best3) {
+      best.push({ label: parseInt(bk) + '月', total: best3[bk], tradeDays: 0 });
+    }
+    best.sort(function (a, b) { return b.total - a.total; });
+
+    var worst = [];
+    for (var wk in worst3) {
+      worst.push({ label: parseInt(wk) + '月', total: worst3[wk], tradeDays: 0 });
+    }
+    worst.sort(function (a, b) { return a.total - b.total; });
+
+    renderBestWorstLabeled(bestContainer, best.slice(0, 3), rankClasses, 'text-profit', '利益月がありません');
+    renderBestWorstLabeled(worstContainer, worst.slice(0, 3), rankClasses, 'text-loss', '損失月がありません');
+  }
+
   /* ================================================================
-     LIFETIME VIEW
+     LIFETIME VIEW (API)
      ================================================================ */
-  function renderLifetime() {
+  function renderLifetimeFromApi(apiData) {
+    setTitle('chartTitle', '月次損益推移（全期間）');
+    setTitle('summaryTitle', '年別サマリー');
+    setTitle('bestTitle', 'ベスト3（月）');
+    setTitle('worstTitle', 'ワースト3（月）');
+    showEl('summarySection', true);
+    showEl('goalSection', false);
+
+    var kpi = apiData.kpi;
+    var monthlyEntries = [];
+    for (var i = 0; i < apiData.chartData.length; i++) {
+      var cd = apiData.chartData[i];
+      var parts = cd.label.split('/');
+      var year = parseInt(parts[0]);
+      var month = parseInt(parts[1]);
+      monthlyEntries.push({
+        label: year + '年' + month + '月',
+        total: cd.value,
+        tradeDays: 0,
+        key: year + '-' + String(month).padStart(2, '0'),
+        year: year,
+        month: month
+      });
+    }
+
+    var winMonths = monthlyEntries.filter(function (e) { return e.total > 0; }).length;
+    var lossMonths = monthlyEntries.filter(function (e) { return e.total < 0; }).length;
+
+    var stats = {
+      totalPnl: kpi.total,
+      winDays: 0,
+      lossDays: 0,
+      tradeDays: kpi.tradeDays || 0,
+      activeMonths: kpi.totalMonths || monthlyEntries.length,
+      avgMonthPnl: kpi.avgMonthly || 0,
+      winRate: Math.round(kpi.winRate || 0),
+      catTotals: apiData.categoryTotals,
+      monthlyEntries: monthlyEntries,
+      yearTotals: apiData.yearlyPnl || {}
+    };
+
+    renderLifetimeKpi(stats, winMonths, lossMonths);
+    renderLifetimeChart(stats);
+    renderCategoryBreakdown(stats.catTotals);
+
+    // Yearly summary from API
+    renderYearlySummaryFromApi(apiData.yearlyPnl || {});
+
+    // Best/worst months from API
+    renderBestWorstLifetimeFromApi(apiData.best3, apiData.worst3);
+  }
+
+  /* ================================================================
+     LIFETIME VIEW (Mock fallback)
+     ================================================================ */
+  function renderLifetimeMock() {
     var stats = calcLifetimeStats();
 
     setTitle('chartTitle', '月次損益推移（全期間）');
@@ -566,7 +869,10 @@
     showEl('summarySection', true);
     showEl('goalSection', false);
 
-    renderLifetimeKpi(stats);
+    var winMonths = stats.monthlyEntries.filter(function (e) { return e.total > 0; }).length;
+    var lossMonths = stats.monthlyEntries.filter(function (e) { return e.total < 0; }).length;
+
+    renderLifetimeKpi(stats, winMonths, lossMonths);
     renderLifetimeChart(stats);
     renderCategoryBreakdown(stats.catTotals);
     renderYearlySummary(stats);
@@ -574,7 +880,7 @@
   }
 
   function calcLifetimeStats() {
-    var allKeys = Object.keys(MOCK_CALENDAR).sort();
+    var allKeys = (typeof MOCK_CALENDAR !== 'undefined') ? Object.keys(MOCK_CALENDAR).sort() : [];
     var totalPnl = 0, winDays = 0, lossDays = 0, tradeDays = 0;
     var catTotals = {};
     var monthlyEntries = [];
@@ -635,16 +941,13 @@
     };
   }
 
-  function renderLifetimeKpi(stats) {
+  function renderLifetimeKpi(stats, winMonths, lossMonths) {
     var container = document.getElementById('reportKpi');
     if (!container) return;
 
-    var winMonths = stats.monthlyEntries.filter(function (e) { return e.total > 0; }).length;
-    var lossMonths = stats.monthlyEntries.filter(function (e) { return e.total < 0; }).length;
-
     var kpis = [
       { icon: '<i class="fa-solid fa-sack-dollar"></i>', value: formatYen(stats.totalPnl), cls: stats.totalPnl >= 0 ? 'text-profit' : 'text-loss', label: '生涯損益合計', sub: stats.activeMonths + 'ヶ月間の記録' },
-      { icon: '<i class="fa-solid fa-bullseye"></i>', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率（日）', sub: stats.tradeDays + '日中 ' + stats.winDays + '勝' },
+      { icon: '<i class="fa-solid fa-bullseye"></i>', value: stats.winRate + '%', cls: stats.winRate >= 50 ? 'text-profit' : 'text-loss', label: '勝率（日）', sub: stats.tradeDays + '日中' },
       { icon: '<i class="fa-solid fa-chart-column"></i>', value: formatYen(stats.avgMonthPnl), cls: stats.avgMonthPnl >= 0 ? 'text-profit' : 'text-loss', label: '平均月間損益', sub: '黒字月 ' + winMonths + ' / 赤字月 ' + lossMonths },
       { icon: '<i class="fa-solid fa-bolt"></i>', value: stats.tradeDays + '日', cls: '', label: '総取引日数', sub: stats.activeMonths + 'ヶ月' }
     ];
@@ -679,25 +982,31 @@
       var entry = entries[i];
       var pnlClass = entry.total >= 0 ? 'profit' : 'loss';
       var barPct = Math.round((Math.abs(entry.total) / maxAbs) * halfHeight);
-      if (barPct < 2) barPct = 2;
+      if (barPct < 2 && entry.total !== 0) barPct = 2;
 
       var tooltipStyle = entry.total >= 0
         ? 'bottom: ' + (halfHeight + barPct + 4) + 'px;'
         : 'top: ' + (halfHeight + barPct + 4) + 'px;';
 
       html += '<div class="report-bar-col">';
-      html += '<div class="report-bar-tooltip ' + pnlClass + '" style="' + tooltipStyle + '">' + formatYen(entry.total) + '</div>';
 
-      if (entry.total >= 0) {
-        html += '<div class="report-bar-upper"><div class="report-bar profit" style="height: ' + barPct + 'px;"></div></div>';
-        html += '<div class="report-bar-lower"></div>';
+      if (entry.total !== 0) {
+        html += '<div class="report-bar-tooltip ' + pnlClass + '" style="' + tooltipStyle + '">' + formatYen(entry.total) + '</div>';
+
+        if (entry.total >= 0) {
+          html += '<div class="report-bar-upper"><div class="report-bar profit" style="height: ' + barPct + 'px;"></div></div>';
+          html += '<div class="report-bar-lower"></div>';
+        } else {
+          html += '<div class="report-bar-upper"></div>';
+          html += '<div class="report-bar-lower"><div class="report-bar loss" style="height: ' + barPct + 'px;"></div></div>';
+        }
       } else {
         html += '<div class="report-bar-upper"></div>';
-        html += '<div class="report-bar-lower"><div class="report-bar loss" style="height: ' + barPct + 'px;"></div></div>';
+        html += '<div class="report-bar-lower"></div>';
       }
 
-      // Short label: "25/10" or "26/1"
-      var shortLabel = String(entry.year).substring(2) + '/' + entry.month;
+      // Short label
+      var shortLabel = entry.year ? String(entry.year).substring(2) + '/' + entry.month : entry.label;
       html += '<span class="report-bar-day">' + shortLabel + '</span>';
       html += '</div>';
     }
@@ -732,6 +1041,61 @@
       '</div>';
     }
     container.innerHTML = html;
+  }
+
+  function renderYearlySummaryFromApi(yearlyPnl) {
+    var container = document.getElementById('reportSummary');
+    if (!container) return;
+
+    var years = Object.keys(yearlyPnl).sort();
+
+    if (years.length === 0) {
+      container.innerHTML = '<div class="report-cat-empty">データがありません</div>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < years.length; i++) {
+      var year = years[i];
+      var total = yearlyPnl[year];
+      var amtClass = total >= 0 ? 'text-profit' : 'text-loss';
+
+      html += '<div class="report-week-item">' +
+        '<div><div class="report-week-label">' + year + '年</div></div>' +
+        '<div style="text-align: right;"><div class="report-week-amount ' + amtClass + '">' + formatYen(total) + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  function renderBestWorstLifetimeFromApi(best3, worst3) {
+    var bestContainer = document.getElementById('bestItems');
+    var worstContainer = document.getElementById('worstItems');
+    var rankClasses = ['gold', 'silver', 'bronze'];
+
+    var best = [];
+    for (var bk in best3) {
+      var bParts = bk.split('-');
+      var bLabel = bParts.length === 2
+        ? parseInt(bParts[0]) + '年' + parseInt(bParts[1]) + '月'
+        : bk + '月';
+      best.push({ label: bLabel, total: best3[bk], tradeDays: 0 });
+    }
+    best.sort(function (a, b) { return b.total - a.total; });
+
+    var worst = [];
+    for (var wk in worst3) {
+      var wParts = wk.split('-');
+      var wLabel = wParts.length === 2
+        ? parseInt(wParts[0]) + '年' + parseInt(wParts[1]) + '月'
+        : wk + '月';
+      worst.push({ label: wLabel, total: worst3[wk], tradeDays: 0 });
+    }
+    worst.sort(function (a, b) { return a.total - b.total; });
+
+    renderBestWorstLabeled(bestContainer, best.slice(0, 3), rankClasses, 'text-profit', '利益月がありません');
+    renderBestWorstLabeled(worstContainer, worst.slice(0, 3), rankClasses, 'text-loss', '損失月がありません');
   }
 
   /* ================================================================
@@ -769,18 +1133,19 @@
     }
 
     var html = '';
-    for (var i = 0; i < MOCK_CATEGORIES.length; i++) {
-      var mc = MOCK_CATEGORIES[i];
+    for (var i = 0; i < reportCategories.length; i++) {
+      var mc = reportCategories[i];
       var amount = catTotals[mc.id] || 0;
       if (amount === 0) continue;
 
       var amtClass = amount >= 0 ? 'text-profit' : 'text-loss';
       var barPct = maxAbs > 0 ? Math.round((Math.abs(amount) / maxAbs) * 100) : 0;
+      var color = mc.color || '#888';
 
       html += '<div class="report-cat-item">' +
-        '<span class="report-cat-dot" style="background: var(--' + mc.colorVar + ');"></span>' +
+        '<span class="report-cat-dot" style="background: ' + color + ';"></span>' +
         '<span class="report-cat-name">' + mc.name + '</span>' +
-        '<div class="report-cat-bar-track"><div class="report-cat-bar-fill" style="width: ' + barPct + '%; background: var(--' + mc.colorVar + ');"></div></div>' +
+        '<div class="report-cat-bar-track"><div class="report-cat-bar-fill" style="width: ' + barPct + '%; background: ' + color + ';"></div></div>' +
         '<span class="report-cat-amount ' + amtClass + '">' + formatYen(amount) + '</span>' +
       '</div>';
     }
@@ -797,64 +1162,77 @@
     var worst = entries.filter(function (e) { return e.total < 0; })
       .sort(function (a, b) { return a.total - b.total; }).slice(0, 3);
 
-    if (bestContainer) {
-      if (best.length === 0) {
-        bestContainer.innerHTML = '<div class="report-rank-empty">利益月がありません</div>';
-      } else {
-        var html = '';
-        for (var i = 0; i < best.length; i++) {
-          html += '<div class="report-rank-item">' +
-            '<span class="report-rank-num ' + rankClasses[i] + '">' + (i + 1) + '</span>' +
-            '<span class="report-rank-date">' + best[i].label + '</span>' +
-            '<span class="report-rank-comment">' + best[i].tradeDays + '日取引</span>' +
-            '<span class="report-rank-amount text-profit">' + formatYen(best[i].total) + '</span>' +
-          '</div>';
-        }
-        bestContainer.innerHTML = html;
-      }
+    renderBestWorstLabeled(bestContainer, best, rankClasses, 'text-profit', '利益月がありません');
+    renderBestWorstLabeled(worstContainer, worst, rankClasses, 'text-loss', '損失月がありません');
+  }
+
+  function renderBestWorstLabeled(container, items, rankClasses, textClass, emptyText) {
+    if (!container) return;
+
+    if (items.length === 0) {
+      container.innerHTML = '<div class="report-rank-empty">' + emptyText + '</div>';
+      return;
     }
 
-    if (worstContainer) {
-      if (worst.length === 0) {
-        worstContainer.innerHTML = '<div class="report-rank-empty">損失月がありません</div>';
-      } else {
-        var html2 = '';
-        for (var j = 0; j < worst.length; j++) {
-          html2 += '<div class="report-rank-item">' +
-            '<span class="report-rank-num ' + rankClasses[j] + '">' + (j + 1) + '</span>' +
-            '<span class="report-rank-date">' + worst[j].label + '</span>' +
-            '<span class="report-rank-comment">' + worst[j].tradeDays + '日取引</span>' +
-            '<span class="report-rank-amount text-loss">' + formatYen(worst[j].total) + '</span>' +
-          '</div>';
-        }
-        worstContainer.innerHTML = html2;
-      }
+    var html = '';
+    for (var i = 0; i < items.length; i++) {
+      html += '<div class="report-rank-item">' +
+        '<span class="report-rank-num ' + rankClasses[i] + '">' + (i + 1) + '</span>' +
+        '<span class="report-rank-date">' + items[i].label + '</span>' +
+        '<span class="report-rank-comment">' + (items[i].tradeDays ? items[i].tradeDays + '日取引' : '') + '</span>' +
+        '<span class="report-rank-amount ' + textClass + '">' + formatYen(items[i].total) + '</span>' +
+      '</div>';
     }
+    container.innerHTML = html;
   }
 
   function renderGoalProgress() {
     var container = document.getElementById('goalProgress');
     if (!container) return;
 
-    var yearlyGoal = MOCK_USER.yearlyGoal;
-    var yearTotal = 0;
-
-    for (var m = 1; m <= 12; m++) {
-      var key = currentYear + '-' + String(m).padStart(2, '0');
-      var monthData = MOCK_CALENDAR[key];
-      if (monthData) {
-        for (var d in monthData) {
-          yearTotal += monthData[d].total;
+    // Fetch goal and year total from API
+    Promise.all([
+      apiFetch('/api/goals?year=' + currentYear).then(function (res) { return res.ok ? res.json() : Promise.reject(); }),
+      apiFetch('/api/pnl/report?period=yearly&year=' + currentYear).then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+    ])
+    .then(function (results) {
+      var goalData = results[0];
+      var yearData = results[1];
+      var yearlyGoal = goalData.amount || 0;
+      var yearTotal = yearData.kpi ? yearData.kpi.total : 0;
+      renderGoalHtml(container, yearlyGoal, yearTotal);
+    })
+    .catch(function () {
+      // Fallback to mock
+      var yearlyGoal = (typeof MOCK_USER !== 'undefined') ? MOCK_USER.yearlyGoal : 0;
+      var yearTotal = 0;
+      if (typeof MOCK_CALENDAR !== 'undefined') {
+        for (var m = 1; m <= 12; m++) {
+          var key = currentYear + '-' + String(m).padStart(2, '0');
+          var monthData = MOCK_CALENDAR[key];
+          if (monthData) {
+            for (var d in monthData) {
+              yearTotal += monthData[d].total;
+            }
+          }
         }
       }
+      renderGoalHtml(container, yearlyGoal, yearTotal);
+    });
+  }
+
+  function renderGoalHtml(container, yearlyGoal, yearTotal) {
+    if (!yearlyGoal || yearlyGoal <= 0) {
+      container.innerHTML = '<div class="report-goal"><div class="report-cat-empty">年間目標が設定されていません</div></div>';
+      return;
     }
 
     var pct = yearlyGoal > 0 ? Math.min(Math.round((yearTotal / yearlyGoal) * 100), 100) : 0;
     if (yearTotal < 0) pct = 0;
 
     var remaining = yearlyGoal - yearTotal;
-    var now = new Date();
-    var remainingMonths = currentYear === now.getFullYear() ? (12 - (now.getMonth() + 1)) : (currentYear > now.getFullYear() ? 12 : 0);
+    var n = new Date();
+    var remainingMonths = currentYear === n.getFullYear() ? (12 - (n.getMonth() + 1)) : (currentYear > n.getFullYear() ? 12 : 0);
     var monthlyNeeded = remainingMonths > 0 ? Math.round(remaining / remainingMonths) : remaining;
 
     var currentClass = yearTotal >= 0 ? 'text-profit' : 'text-loss';

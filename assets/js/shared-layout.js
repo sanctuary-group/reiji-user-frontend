@@ -217,14 +217,29 @@
   // ---- Right Sidebar: P&L Summary ----
   function renderPnlSummary() {
     var container = document.getElementById('rightPnlSummary');
-    if (!container || typeof MOCK_PNL_SUMMARY === 'undefined') return;
+    if (!container) return;
 
-    var items = [
-      { label: '今月の損益', value: MOCK_PNL_SUMMARY.thisMonth.total, href: 'calendar.html' },
-      { label: '先月損益', value: MOCK_PNL_SUMMARY.thisYear.total, href: 'report.html' },
-      { label: '生涯損益', value: MOCK_PNL_SUMMARY.lifetime.total, href: 'report.html' }
-    ];
+    apiFetch('/api/pnl/summary')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (data) {
+        renderPnlSummaryHtml(container, [
+          { label: '今日の損益', value: data.today, href: 'calendar.html' },
+          { label: '今月の損益', value: data.month, href: 'report.html' },
+          { label: '今年の損益', value: data.year, href: 'report.html?period=yearly' }
+        ]);
+      })
+      .catch(function () {
+        if (typeof MOCK_PNL_SUMMARY !== 'undefined') {
+          renderPnlSummaryHtml(container, [
+            { label: '今月の損益', value: MOCK_PNL_SUMMARY.thisMonth.total, href: 'calendar.html' },
+            { label: '今年の損益', value: MOCK_PNL_SUMMARY.thisYear.total, href: 'report.html' },
+            { label: '生涯損益', value: MOCK_PNL_SUMMARY.lifetime.total, href: 'report.html' }
+          ]);
+        }
+      });
+  }
 
+  function renderPnlSummaryHtml(container, items) {
     var html = '';
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
@@ -298,23 +313,43 @@
   // ---- Right Sidebar: Economic Indicators ----
   function renderEconomicIndicators() {
     var container = document.getElementById('rightIndicators');
-    if (!container || typeof MOCK_ECONOMIC_INDICATORS === 'undefined') return;
+    if (!container) return;
+
+    fetch('/api/economic/indicators', {
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function (json) {
+      renderIndicatorItems(container, json.data);
+    })
+    .catch(function () {
+      if (typeof MOCK_ECONOMIC_INDICATORS !== 'undefined') {
+        renderIndicatorItems(container, MOCK_ECONOMIC_INDICATORS);
+      }
+    });
+  }
+
+  function renderIndicatorItems(container, data) {
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:1rem;color:#888;">本日の経済指標はありません</div>';
+      return;
+    }
 
     var html = '';
-    for (var i = 0; i < MOCK_ECONOMIC_INDICATORS.length; i++) {
-      var ind = MOCK_ECONOMIC_INDICATORS[i];
-      var actualHtml = ind.actual ? '<span class="right-indicator-val actual">' + ind.actual + '</span>' : '<span class="right-indicator-val">-</span>';
-      var stars = ind.importance === 'high' ? '★★★' : ind.importance === 'medium' ? '★★' : '★';
+    var max = Math.min(data.length, 10);
+    for (var i = 0; i < max; i++) {
+      var ind = data[i];
+      var starCount = ind.importance || 1;
+      var stars = Array(starCount + 1).join('★');
+      var level = starCount >= 4 ? 'high' : starCount >= 3 ? 'medium' : 'low';
       html += '<div class="right-indicator-item">' +
         '<span class="right-indicator-time">' + ind.time + '</span>' +
         '<span class="right-indicator-country">' + ind.country + '</span>' +
         '<span class="right-indicator-name">' + ind.name + '</span>' +
-        '<span class="right-indicator-importance ' + ind.importance + '">' + stars + '</span>' +
-        '<div class="right-indicator-values">' +
-          actualHtml +
-          '<span class="right-indicator-val">' + ind.forecast + '</span>' +
-          '<span class="right-indicator-val">' + ind.previous + '</span>' +
-        '</div>' +
+        '<span class="right-indicator-importance ' + level + '">' + stars + '</span>' +
       '</div>';
     }
     container.innerHTML = html;

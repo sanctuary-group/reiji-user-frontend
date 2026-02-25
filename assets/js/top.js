@@ -125,7 +125,7 @@
     var html = '';
     for (var i = 0; i < data.length; i++) {
       var n = data[i];
-      html += '<a href="' + n.url + '" class="news-item">' +
+      html += '<a href="' + n.url + '" class="news-item" target="_blank" rel="noopener noreferrer">' +
         '<span class="news-title">' + n.title + '</span>' +
         '<span class="badge badge-primary news-source">' + n.source + '</span>' +
         '<span class="news-date">' + n.date + '</span>' +
@@ -135,10 +135,38 @@
   }
 
   function renderCryptoNews() {
-    renderNewsItems('cryptoNewsList', MOCK_CRYPTO_NEWS);
+    fetch('/api/crypto/news', {
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function (json) {
+      renderNewsItems('cryptoNewsList', json.data.slice(0, 5));
+    })
+    .catch(function () {
+      if (typeof MOCK_CRYPTO_NEWS !== 'undefined') {
+        renderNewsItems('cryptoNewsList', MOCK_CRYPTO_NEWS);
+      }
+    });
   }
 
   function renderForexNews() {
-    renderNewsItems('forexNewsList', MOCK_FOREX_NEWS);
+    fetch('/api/forex/news', {
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function (json) {
+      renderNewsItems('forexNewsList', json.data.slice(0, 5));
+    })
+    .catch(function () {
+      if (typeof MOCK_FOREX_NEWS !== 'undefined') {
+        renderNewsItems('forexNewsList', MOCK_FOREX_NEWS);
+      }
+    });
   }
 })();

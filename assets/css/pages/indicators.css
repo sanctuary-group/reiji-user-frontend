@@ -145,6 +145,10 @@
   text-align: center;
 }
 
+.indi-td-name {
+  white-space: normal;
+}
+
 .indi-td-importance {
   text-align: center;
 }

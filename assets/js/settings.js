@@ -67,13 +67,24 @@
   function initGoalForm() {
     var amountInput = document.getElementById('settingsGoalAmount');
     var monthlyAvg = document.getElementById('goalMonthlyAvg');
+    var currentYear = new Date().getFullYear();
+
+    // Load current goal from API
+    apiFetch('/api/goals?year=' + currentYear)
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (data) {
+        if (data.amount && amountInput) {
+          amountInput.value = new Intl.NumberFormat('ja-JP').format(data.amount);
+          updateMonthly();
+        }
+      })
+      .catch(function () {});
 
     function updateMonthly() {
       if (!amountInput || !monthlyAvg) return;
       var raw = amountInput.value.replace(/[^0-9]/g, '');
       var amount = parseInt(raw) || 0;
 
-      // Format the input
       if (raw) {
         amountInput.value = new Intl.NumberFormat('ja-JP').format(amount);
       }
@@ -90,21 +101,59 @@
     var saveBtn = document.getElementById('saveGoal');
     if (saveBtn) {
       saveBtn.addEventListener('click', function () {
-        showToast('年間目標を保存しました');
+        var raw = amountInput ? amountInput.value.replace(/[^0-9]/g, '') : '0';
+        var amount = parseInt(raw) || 0;
+
+        apiFetch('/api/goals', {
+          method: 'POST',
+          body: { year: currentYear, amount: amount }
+        })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function () { showToast('年間目標を保存しました'); })
+          .catch(function () { showToast('保存に失敗しました'); });
       });
     }
   }
 
   /* ---- Category Management ---- */
+  var settingsCategories = [];
+
   function initCategories() {
-    renderCategories();
+    fetchAndRenderCategories();
 
     var addBtn = document.getElementById('addCategory');
     if (addBtn) {
       addBtn.addEventListener('click', function () {
-        showToast('カテゴリ追加機能（プロトタイプ）');
+        var name = prompt('カテゴリ名を入力してください:');
+        if (!name || !name.trim()) return;
+        var color = prompt('カラーコード（例: #dc2626）:', '#888888');
+        if (!color) return;
+
+        apiFetch('/api/pnl/categories', {
+          method: 'POST',
+          body: { name: name.trim(), color: color }
+        })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function () {
+            showToast('カテゴリを追加しました');
+            fetchAndRenderCategories();
+          })
+          .catch(function () { showToast('追加に失敗しました'); });
       });
     }
+  }
+
+  function fetchAndRenderCategories() {
+    apiFetch('/api/pnl/categories')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (cats) {
+        settingsCategories = cats;
+        renderCategories();
+      })
+      .catch(function () {
+        settingsCategories = (typeof MOCK_CATEGORIES !== 'undefined') ? MOCK_CATEGORIES : [];
+        renderCategories();
+      });
   }
 
   function renderCategories() {
@@ -112,30 +161,55 @@
     if (!container) return;
 
     var html = '';
-    for (var i = 0; i < MOCK_CATEGORIES.length; i++) {
-      var cat = MOCK_CATEGORIES[i];
+    for (var i = 0; i < settingsCategories.length; i++) {
+      var cat = settingsCategories[i];
+      var color = cat.color || '#888';
+      var isCustom = cat.user_id !== null && cat.user_id !== undefined;
       html += '<div class="settings-cat-item">' +
-        '<span class="settings-cat-dot" style="background: var(--' + cat.colorVar + ');"></span>' +
+        '<span class="settings-cat-dot" style="background: ' + color + ';"></span>' +
         '<span class="settings-cat-name">' + cat.name + '</span>' +
-        '<span class="settings-cat-id">' + cat.id + '</span>' +
+        '<span class="settings-cat-id">' + (cat.slug || '') + '</span>' +
         '<div class="settings-cat-actions">' +
-          '<button class="settings-cat-btn edit" title="編集" data-id="' + cat.id + '"><i class="fa-solid fa-pen"></i></button>' +
-          '<button class="settings-cat-btn delete" title="削除" data-id="' + cat.id + '"><i class="fa-solid fa-xmark"></i></button>' +
+          (isCustom ? '<button class="settings-cat-btn edit" title="編集" data-id="' + cat.id + '"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="settings-cat-btn delete" title="削除" data-id="' + cat.id + '"><i class="fa-solid fa-xmark"></i></button>' : '') +
         '</div>' +
       '</div>';
     }
     container.innerHTML = html;
 
-    // Event listeners
     container.querySelectorAll('.settings-cat-btn.edit').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        showToast('カテゴリ編集機能（プロトタイプ）');
+        var id = this.getAttribute('data-id');
+        var cat = settingsCategories.find(function (c) { return String(c.id) === id; });
+        if (!cat) return;
+        var newName = prompt('新しいカテゴリ名:', cat.name);
+        if (!newName || !newName.trim()) return;
+
+        apiFetch('/api/pnl/categories/' + id, {
+          method: 'PUT',
+          body: { name: newName.trim() }
+        })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function () {
+            showToast('カテゴリを更新しました');
+            fetchAndRenderCategories();
+          })
+          .catch(function () { showToast('更新に失敗しました'); });
       });
     });
 
     container.querySelectorAll('.settings-cat-btn.delete').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        showToast('カテゴリ削除機能（プロトタイプ）');
+        var id = this.getAttribute('data-id');
+        if (!confirm('このカテゴリを削除しますか？')) return;
+
+        apiFetch('/api/pnl/categories/' + id, { method: 'DELETE' })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function () {
+            showToast('カテゴリを削除しました');
+            fetchAndRenderCategories();
+          })
+          .catch(function () { showToast('削除に失敗しました'); });
       });
     });
   }
@@ -671,24 +745,63 @@
   }
 
   function getPnlData(days) {
-    if (typeof MOCK_CALENDAR === 'undefined') return [];
-    var today = new Date(2026, 1, 20);
+    var today = new Date();
     var data = [];
     for (var i = days - 1; i >= 0; i--) {
       var d = new Date(today);
       d.setDate(d.getDate() - i);
-      var ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-      var day = d.getDate();
-      var pnl = 0;
-      if (MOCK_CALENDAR[ym] && MOCK_CALENDAR[ym][day]) {
-        pnl = MOCK_CALENDAR[ym][day].total;
-      }
       data.push({
         dateStr: String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'),
-        pnl: pnl
+        pnl: 0,
+        dateObj: new Date(d)
       });
     }
     return data;
+  }
+
+  function getPnlDataFromApi(days) {
+    var today = new Date();
+    // Determine months needed
+    var startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - days + 1);
+
+    var months = [];
+    var d = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    while (d <= today) {
+      months.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+      d.setMonth(d.getMonth() + 1);
+    }
+
+    var promises = months.map(function (m) {
+      return apiFetch('/api/pnl/calendar?year=' + m.year + '&month=' + m.month)
+        .then(function (res) { return res.ok ? res.json() : { data: {} }; })
+        .catch(function () { return { data: {} }; });
+    });
+
+    return Promise.all(promises).then(function (results) {
+      // Build day map from all months
+      var dayMap = {};
+      for (var r = 0; r < results.length; r++) {
+        var calData = results[r].data || {};
+        var m = months[r];
+        for (var dayKey in calData) {
+          var dateStr = m.year + '-' + String(m.month).padStart(2, '0') + '-' + String(dayKey).padStart(2, '0');
+          dayMap[dateStr] = calData[dayKey].total || 0;
+        }
+      }
+
+      var data = [];
+      for (var i = days - 1; i >= 0; i--) {
+        var dd = new Date(today);
+        dd.setDate(dd.getDate() - i);
+        var key = dd.getFullYear() + '-' + String(dd.getMonth() + 1).padStart(2, '0') + '-' + String(dd.getDate()).padStart(2, '0');
+        data.push({
+          dateStr: String(dd.getMonth() + 1).padStart(2, '0') + '-' + String(dd.getDate()).padStart(2, '0'),
+          pnl: dayMap[key] || 0
+        });
+      }
+      return data;
+    });
   }
 
   function renderPnlChart(period) {
@@ -696,7 +809,18 @@
     var summaryEl = document.getElementById('pnlSummaryRow');
     if (!container) return;
 
-    var data = getPnlData(period);
+    // Use API to get PnL data
+    getPnlDataFromApi(Math.max(period, 30))
+      .then(function (allData) {
+        var data = allData.slice(allData.length - period);
+        doRenderPnlChart(container, summaryEl, data, allData);
+      })
+      .catch(function () {
+        container.innerHTML = '';
+      });
+  }
+
+  function doRenderPnlChart(container, summaryEl, data, allData30) {
     if (data.length === 0) { container.innerHTML = ''; return; }
 
     // Cumulative P&L
@@ -711,7 +835,6 @@
     var todayPnl = data[data.length - 1].pnl;
     var sevenSum = 0;
     var thirtySum = 0;
-    var allData30 = getPnlData(30);
     for (var j = 0; j < allData30.length; j++) {
       thirtySum += allData30[j].pnl;
       if (j >= allData30.length - 7) sevenSum += allData30[j].pnl;

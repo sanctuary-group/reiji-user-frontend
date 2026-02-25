@@ -1,10 +1,12 @@
 /**
  * Graph Page JS - Cumulative P&L Line Chart (Equity Curve)
+ * Uses API: GET /api/pnl/report
  */
 (function () {
+  var now = new Date();
   var currentPeriod = 'monthly';
-  var currentYear = 2026;
-  var currentMonth = 2;
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1;
 
   // SVG layout constants
   var SVG_WIDTH = 800;
@@ -78,12 +80,56 @@
   function renderGraph() {
     updateTitle();
 
+    var url = '/api/pnl/report?period=' + currentPeriod;
     if (currentPeriod === 'monthly') {
-      renderMonthlyGraph();
+      url += '&year=' + currentYear + '&month=' + currentMonth;
     } else if (currentPeriod === 'yearly') {
-      renderYearlyGraph();
+      url += '&year=' + currentYear;
+    }
+
+    apiFetch(url)
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (apiData) {
+        renderFromApi(apiData);
+      })
+      .catch(function () {
+        renderFromMock();
+      });
+  }
+
+  function renderFromApi(apiData) {
+    var chartData = apiData.chartData || [];
+    if (chartData.length === 0) { renderEmptyState(); return; }
+
+    var points = [];
+    var cumulative = 0;
+
+    for (var i = 0; i < chartData.length; i++) {
+      var cd = chartData[i];
+      if (cd.value !== 0 || cumulative !== 0 || points.length > 0) {
+        cumulative += cd.value;
+        points.push({
+          label: cd.label + (currentPeriod === 'monthly' ? '日' : ''),
+          daily: cd.value,
+          cumulative: cumulative
+        });
+      }
+    }
+
+    if (points.length === 0) { renderEmptyState(); return; }
+
+    renderKpi(points);
+    renderSvgChart(points);
+    renderTable(points);
+  }
+
+  function renderFromMock() {
+    if (currentPeriod === 'monthly') {
+      renderMonthlyGraphMock();
+    } else if (currentPeriod === 'yearly') {
+      renderYearlyGraphMock();
     } else {
-      renderLifetimeGraph();
+      renderLifetimeGraphMock();
     }
   }
 
@@ -116,9 +162,9 @@
   }
 
   // ================================================================
-  //  MONTHLY
+  //  MOCK FALLBACKS
   // ================================================================
-  function renderMonthlyGraph() {
+  function renderMonthlyGraphMock() {
     var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
     var monthData = (typeof MOCK_CALENDAR !== 'undefined') ? MOCK_CALENDAR[key] : null;
 
@@ -127,7 +173,6 @@
       return;
     }
 
-    // Build data points: sorted by day
     var days = Object.keys(monthData).map(Number).sort(function (a, b) { return a - b; });
     var points = [];
     var cumulative = 0;
@@ -145,10 +190,7 @@
     renderTable(points);
   }
 
-  // ================================================================
-  //  YEARLY
-  // ================================================================
-  function renderYearlyGraph() {
+  function renderYearlyGraphMock() {
     if (typeof MOCK_CALENDAR === 'undefined') { renderEmptyState(); return; }
 
     var points = [];
@@ -181,10 +223,7 @@
     renderTable(points);
   }
 
-  // ================================================================
-  //  LIFETIME
-  // ================================================================
-  function renderLifetimeGraph() {
+  function renderLifetimeGraphMock() {
     if (typeof MOCK_CALENDAR === 'undefined') { renderEmptyState(); return; }
 
     var keys = Object.keys(MOCK_CALENDAR).sort();
@@ -200,7 +239,6 @@
       }
       cumulative += monthTotal;
 
-      // Format label: 2025/10
       var parts = keys[k].split('-');
       points.push({
         label: parts[0] + '/' + parseInt(parts[1], 10),
@@ -350,7 +388,6 @@
 
     // Area fill (polygon)
     var baseY = PADDING.top + ((yMax - Math.max(yMin, Math.min(0, yMax))) / yRange) * CHART_H;
-    // Use bottom of chart as base if all positive/negative
     if (dataMin >= 0) {
       baseY = PADDING.top + CHART_H;
     } else if (dataMax <= 0) {

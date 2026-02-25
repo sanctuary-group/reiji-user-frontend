@@ -706,8 +706,6 @@
 
 .right-indicator-country {
   flex-shrink: 0;
-  width: 18px;
-  text-align: center;
   font-weight: var(--font-bold);
   color: var(--text-secondary);
 }
@@ -738,25 +736,6 @@
 
 .right-indicator-importance.low {
   color: var(--text-tertiary);
-}
-
-.right-indicator-values {
-  display: flex;
-  gap: var(--space-1);
-  flex-shrink: 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-}
-
-.right-indicator-val {
-  width: 44px;
-  text-align: right;
-  color: var(--text-secondary);
-}
-
-.right-indicator-val.actual {
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
 }
 
 /* ---- Shared Footer ---- */

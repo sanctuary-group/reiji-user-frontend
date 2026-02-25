@@ -1,6 +1,21 @@
 /**
- * Mock Data - All dummy data for prototype
+ * Mock Data & API Helpers
  */
+
+/**
+ * Authenticated API fetch helper
+ */
+function apiFetch(url, options) {
+  options = options || {};
+  options.headers = options.headers || {};
+  options.headers['Authorization'] = 'Bearer ' + (window.REIJI_TOKEN || localStorage.getItem('reiji_token') || '');
+  options.headers['Accept'] = 'application/json';
+  if (options.body && typeof options.body !== 'string') {
+    options.headers['Content-Type'] = 'application/json';
+    options.body = JSON.stringify(options.body);
+  }
+  return fetch(url, options);
+}
 
 var MOCK_USER = {
   name: '投資太郎',
