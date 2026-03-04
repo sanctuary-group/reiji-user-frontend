@@ -24,6 +24,16 @@
       }
     }
 
+    // Check for password reset token in URL
+    var resetToken = params.get('reset_token');
+    var resetEmail = params.get('email');
+    if (resetToken && resetEmail) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      initEventListeners();
+      switchToResetMode(resetToken, resetEmail);
+      return;
+    }
+
     // Check for verification token in URL
     var token = params.get('token');
     if (token) {
@@ -32,11 +42,28 @@
     }
 
     // Restore registration_token from sessionStorage (survives reload)
+    // Validate with server before proceeding to Step 2
     var savedRegToken = sessionStorage.getItem('reiji_registration_token');
     if (savedRegToken) {
-      registrationToken = savedRegToken;
-      initEventListeners();
-      goToStep(2);
+      fetch(API_BASE + '/auth/verify-registration-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ registration_token: savedRegToken }),
+      })
+      .then(function (res) {
+        if (res.ok) {
+          registrationToken = savedRegToken;
+          initEventListeners();
+          goToStep(2);
+        } else {
+          sessionStorage.removeItem('reiji_registration_token');
+          initEventListeners();
+        }
+      })
+      .catch(function () {
+        sessionStorage.removeItem('reiji_registration_token');
+        initEventListeners();
+      });
       return;
     }
 
@@ -111,6 +138,51 @@
       });
     }
 
+    // Forgot password link
+    var showForgotLink = document.getElementById('showForgotForm');
+    if (showForgotLink) {
+      showForgotLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        switchToForgotMode();
+      });
+    }
+
+    // Back to login from forgot
+    var backToLoginLink = document.getElementById('backToLogin');
+    if (backToLoginLink) {
+      backToLoginLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        switchToLoginMode();
+      });
+    }
+
+    // Forgot password form submit
+    var forgotForm = document.getElementById('forgotForm');
+    if (forgotForm) {
+      forgotForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        sendPasswordReset();
+      });
+    }
+
+    // Reset password form submit
+    var resetForm = document.getElementById('resetForm');
+    if (resetForm) {
+      resetForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        resetPassword();
+      });
+    }
+
+    // Back to login from reset complete
+    var resetBackToLoginLink = document.getElementById('resetBackToLogin');
+    if (resetBackToLoginLink) {
+      resetBackToLoginLink.addEventListener('click', function (e) {
+        e.preventDefault();
+        switchToLoginMode();
+      });
+    }
+
     // Step 3: LINE friend add (mandatory) / Skip for existing friends
     var skipFriendBtn = document.getElementById('skipFriendBtn');
     if (skipFriendBtn) {
@@ -172,6 +244,145 @@
       progressLines[k].classList.remove('completed');
     }
     currentStep = 1;
+  }
+
+  var _resetToken = null;
+  var _resetEmail = null;
+
+  function switchToForgotMode() {
+    hideError();
+    var pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = 'パスワードリセット';
+
+    var progress = document.getElementById('loginProgress');
+    if (progress) progress.style.display = 'none';
+
+    var steps = document.querySelectorAll('.login-step');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.remove('active');
+    }
+
+    var forgotStep = document.querySelector('.login-step[data-step="forgot"]');
+    if (forgotStep) forgotStep.classList.add('active');
+  }
+
+  function switchToResetMode(token, email) {
+    _resetToken = token;
+    _resetEmail = email;
+    hideError();
+    var pageTitle = document.getElementById('pageTitle');
+    if (pageTitle) pageTitle.textContent = 'パスワードリセット';
+
+    var progress = document.getElementById('loginProgress');
+    if (progress) progress.style.display = 'none';
+
+    var steps = document.querySelectorAll('.login-step');
+    for (var i = 0; i < steps.length; i++) {
+      steps[i].classList.remove('active');
+    }
+
+    var resetStep = document.querySelector('.login-step[data-step="reset"]');
+    if (resetStep) resetStep.classList.add('active');
+  }
+
+  function sendPasswordReset() {
+    var emailInput = document.getElementById('forgotEmail');
+    var email = emailInput.value;
+    var btn = document.getElementById('sendResetBtn');
+
+    hideError();
+    btn.disabled = true;
+    btn.textContent = '送信中...';
+
+    fetch(API_BASE + '/auth/password/send-reset', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ email: email }),
+    })
+    .then(function (res) {
+      return res.json().then(function (data) {
+        return { status: res.status, data: data };
+      });
+    })
+    .then(function (result) {
+      btn.disabled = false;
+      btn.textContent = 'リセットメールを送信';
+
+      if (result.status >= 200 && result.status < 300) {
+        var form = document.getElementById('forgotForm');
+        var sentMsg = document.getElementById('resetSentMessage');
+        if (form) form.style.display = 'none';
+        if (sentMsg) sentMsg.style.display = 'block';
+      } else {
+        showError(result.data.message || 'エラーが発生しました。');
+      }
+    })
+    .catch(function () {
+      btn.disabled = false;
+      btn.textContent = 'リセットメールを送信';
+      showError('サーバーに接続できません。');
+    });
+  }
+
+  function resetPassword() {
+    var password = document.getElementById('resetPassword').value;
+    var passwordConfirm = document.getElementById('resetPasswordConfirm').value;
+    var btn = document.getElementById('resetPasswordBtn');
+
+    hideError();
+
+    if (password !== passwordConfirm) {
+      showError('パスワードが一致しません。');
+      return;
+    }
+
+    if (password.length > 8) {
+      showError('パスワードは8文字以内で入力してください。');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '変更中...';
+
+    fetch(API_BASE + '/auth/password/reset', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        token: _resetToken,
+        email: _resetEmail,
+        password: password,
+        password_confirmation: passwordConfirm,
+      }),
+    })
+    .then(function (res) {
+      return res.json().then(function (data) {
+        return { status: res.status, data: data };
+      });
+    })
+    .then(function (result) {
+      btn.disabled = false;
+      btn.textContent = 'パスワードを変更';
+
+      if (result.status >= 200 && result.status < 300) {
+        var form = document.getElementById('resetForm');
+        var completeMsg = document.getElementById('resetCompleteMessage');
+        if (form) form.style.display = 'none';
+        if (completeMsg) completeMsg.style.display = 'block';
+      } else {
+        showError(result.data.message || 'エラーが発生しました。');
+      }
+    })
+    .catch(function () {
+      btn.disabled = false;
+      btn.textContent = 'パスワードを変更';
+      showError('サーバーに接続できません。');
+    });
   }
 
   function sendVerification() {
@@ -269,6 +480,12 @@
       return;
     }
 
+    var agreeTerms = document.getElementById('agreeTerms');
+    if (!agreeTerms.checked) {
+      showError('プライバシーポリシーと利用規約に同意してください。');
+      return;
+    }
+
     var btn = document.querySelector('#registerForm button[type="submit"]');
     btn.disabled = true;
     btn.textContent = '登録中...';
@@ -281,6 +498,7 @@
       },
       body: JSON.stringify({
         registration_token: registrationToken,
+        display_name: document.getElementById('displayName').value,
         line_name: document.getElementById('lineName').value,
         age: parseInt(document.getElementById('age').value, 10),
         gender: document.getElementById('gender').value,

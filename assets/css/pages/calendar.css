@@ -21,6 +21,359 @@
   font-size: var(--text-lg);
 }
 
+/* ========================================
+   Ranking Section
+   ======================================== */
+
+.ranking-section {
+  margin-bottom: var(--space-6);
+}
+
+.ranking-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: #b8860b;
+}
+
+.ranking-header-icon {
+  color: #FFD700;
+  font-size: var(--text-xl);
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.7));
+  animation: crownPulse 2s ease-in-out infinite;
+}
+
+@keyframes crownPulse {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.7)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 1)); transform: scale(1.1); }
+}
+
+/* ---- Podium Layout ---- */
+.ranking-podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+/* ---- Ranking Card ---- */
+.ranking-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  text-align: center;
+  flex: 1;
+  max-width: 200px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  transition: transform var(--transition-fast);
+}
+
+.ranking-card:hover {
+  transform: translateY(-2px);
+}
+
+/* -- Gold (1st) -- */
+.ranking-card-gold {
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFE082 30%, #FFF3CD 50%, #FFD54F 70%, #FFECB3 100%);
+  border-color: rgba(255, 193, 7, 0.6);
+  box-shadow:
+    0 4px 24px rgba(255, 193, 7, 0.35),
+    0 0 40px rgba(255, 215, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  padding: var(--space-5) var(--space-5);
+  order: 2;
+  animation: goldGlow 3s ease-in-out infinite;
+}
+
+@keyframes goldGlow {
+  0%, 100% { box-shadow: 0 4px 24px rgba(255, 193, 7, 0.35), 0 0 40px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+  50% { box-shadow: 0 4px 32px rgba(255, 193, 7, 0.5), 0 0 60px rgba(255, 215, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8); }
+}
+
+.ranking-card-gold .ranking-medal {
+  color: #FFD700;
+  font-size: var(--text-2xl);
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+  animation: medalSparkle 2s ease-in-out infinite;
+}
+
+@keyframes medalSparkle {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)); transform: scale(1); }
+  25% { filter: drop-shadow(0 0 14px rgba(255, 215, 0, 1)); transform: scale(1.15); }
+  50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)); transform: scale(1); }
+  75% { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9)); transform: scale(1.08); }
+}
+
+.ranking-card-gold .ranking-pnl {
+  color: #b8860b;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* Primary shine sweep for gold */
+.ranking-card-gold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  animation: rankingShine 2.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Secondary shine sweep for gold */
+.ranking-card-gold::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: rankingShine2 3.5s ease-in-out 1s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes rankingShine {
+  0% { left: -100%; }
+  40% { left: 150%; }
+  100% { left: 150%; }
+}
+
+@keyframes rankingShine2 {
+  0% { left: -100%; }
+  50% { left: 150%; }
+  100% { left: 150%; }
+}
+
+/* -- Silver (2nd) -- */
+.ranking-card-silver {
+  background: linear-gradient(135deg, #FAFAFA 0%, #E8E8E8 30%, #F5F5F5 50%, #D8D8D8 70%, #F0F0F0 100%);
+  border-color: rgba(192, 192, 192, 0.5);
+  box-shadow: 0 2px 16px rgba(150, 150, 150, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  order: 1;
+}
+
+.ranking-card-silver .ranking-medal {
+  color: #B0B0B0;
+  font-size: var(--text-xl);
+  filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.5));
+  animation: silverSparkle 3s ease-in-out infinite;
+}
+
+@keyframes silverSparkle {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(192, 192, 192, 0.5)); }
+  50% { filter: drop-shadow(0 0 10px rgba(192, 192, 192, 0.9)); }
+}
+
+.ranking-card-silver .ranking-pnl {
+  color: #555;
+}
+
+/* Shine sweep for silver */
+.ranking-card-silver::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: rankingShine 3.5s ease-in-out 0.5s infinite;
+  pointer-events: none;
+}
+
+/* -- Bronze (3rd) -- */
+.ranking-card-bronze {
+  background: linear-gradient(135deg, #FFF5EB 0%, #FFDBB5 30%, #FFE8D6 50%, #F0C090 70%, #FFDBB5 100%);
+  border-color: rgba(205, 127, 50, 0.4);
+  box-shadow: 0 2px 16px rgba(205, 127, 50, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  order: 3;
+}
+
+.ranking-card-bronze .ranking-medal {
+  color: #CD7F32;
+  font-size: var(--text-xl);
+  filter: drop-shadow(0 0 4px rgba(205, 127, 50, 0.5));
+  animation: bronzeSparkle 3s ease-in-out 0.3s infinite;
+}
+
+@keyframes bronzeSparkle {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(205, 127, 50, 0.5)); }
+  50% { filter: drop-shadow(0 0 10px rgba(205, 127, 50, 0.9)); }
+}
+
+.ranking-card-bronze .ranking-pnl {
+  color: #8B5E3C;
+}
+
+/* Shine sweep for bronze */
+.ranking-card-bronze::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  animation: rankingShine 4s ease-in-out 1s infinite;
+  pointer-events: none;
+}
+
+/* -- Card Inner Elements -- */
+.ranking-medal {
+  margin-bottom: var(--space-2);
+  line-height: 1;
+}
+
+.ranking-rank {
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
+  letter-spacing: 0.05em;
+}
+
+.ranking-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ranking-pnl {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+}
+
+/* -- Sparkle Particles -- */
+.ranking-sparkle {
+  position: absolute;
+  color: rgba(255, 215, 0, 0.8);
+  pointer-events: none;
+  animation: sparkleFloat 2s ease-in-out infinite;
+  z-index: 2;
+  line-height: 1;
+}
+
+@keyframes sparkleFloat {
+  0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+  30% { opacity: 1; transform: scale(1.2) rotate(90deg); }
+  60% { opacity: 0.8; transform: scale(0.9) rotate(180deg); }
+  80% { opacity: 0.3; transform: scale(0.6) rotate(270deg); }
+}
+
+.ranking-card-silver .ranking-sparkle {
+  color: rgba(192, 192, 192, 0.7);
+}
+
+.ranking-card-bronze .ranking-sparkle {
+  color: rgba(205, 160, 80, 0.7);
+}
+
+/* -- Highlight if current user -- */
+.ranking-card-me {
+  box-shadow: 0 0 0 2px var(--color-primary), 0 4px 16px rgba(217, 119, 6, 0.2);
+}
+
+/* -- Dark mode adjustments -- */
+[data-theme="dark"] .ranking-header {
+  color: #FFD700;
+}
+
+[data-theme="dark"] .ranking-card-gold {
+  background: linear-gradient(135deg, #3D3200, #4A3D00, #2E2600);
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+[data-theme="dark"] .ranking-card-gold .ranking-pnl {
+  color: #FFD700;
+}
+
+[data-theme="dark"] .ranking-card-silver {
+  background: linear-gradient(135deg, #2A2A2A, #333, #2A2A2A);
+  border-color: rgba(192, 192, 192, 0.2);
+}
+
+[data-theme="dark"] .ranking-card-silver .ranking-pnl {
+  color: #C0C0C0;
+}
+
+[data-theme="dark"] .ranking-card-bronze {
+  background: linear-gradient(135deg, #3D2B1A, #4A3322, #2E1F10);
+  border-color: rgba(205, 127, 50, 0.3);
+}
+
+[data-theme="dark"] .ranking-card-bronze .ranking-pnl {
+  color: #DDA15E;
+}
+
+[data-theme="dark"] .ranking-card-gold .ranking-sparkle {
+  color: rgba(255, 215, 0, 0.6);
+}
+
+[data-theme="dark"] .ranking-card-silver .ranking-sparkle {
+  color: rgba(220, 220, 220, 0.5);
+}
+
+[data-theme="dark"] .ranking-card-bronze .ranking-sparkle {
+  color: rgba(221, 161, 94, 0.5);
+}
+
+/* -- Responsive -- */
+@media (max-width: 768px) {
+  .ranking-podium {
+    gap: var(--space-2);
+  }
+
+  .ranking-card {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .ranking-card-gold {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .ranking-pnl {
+    font-size: var(--text-sm);
+  }
+
+  .ranking-name {
+    font-size: var(--text-xs);
+  }
+}
+
 /* ---- Calendar Header ---- */
 .cal-header {
   display: flex;

@@ -24,10 +24,10 @@
     }
 
     // Active link highlighting
-    var currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    var currentPath = window.location.pathname;
     document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(function (link) {
       var href = link.getAttribute('href');
-      if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+      if (href && href === currentPath) {
         link.classList.add('active');
       }
     });

@@ -40,6 +40,12 @@
   gap: var(--space-4);
 }
 
+.ntc-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .ntc-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);

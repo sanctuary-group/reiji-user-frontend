@@ -36,96 +36,104 @@
   }
 
   function renderSidebarProfile() {
-    // Nav username
-    var navName = document.getElementById('navUserName');
-    if (navName) navName.textContent = MOCK_USER.name;
+    function applyProfile(user) {
+      var name = (user && user.display_name) || (user && user.line_name) || '---';
+      var style = (user && user.investment_style) || '';
+      var bio = (user && user.bio) || '';
 
-    // Sidebar name
-    var nameEl = document.getElementById('sidebarName');
-    if (nameEl) nameEl.textContent = MOCK_USER.name;
+      var navName = document.getElementById('navUserName');
+      if (navName) navName.textContent = name;
 
-    // Sidebar style badge
-    var styleEl = document.getElementById('sidebarStyle');
-    if (styleEl) styleEl.textContent = MOCK_USER.style;
+      var nameEl = document.getElementById('sidebarName');
+      if (nameEl) nameEl.textContent = name;
 
-    // Sidebar bio
-    var bioEl = document.getElementById('sidebarBio');
-    if (bioEl) bioEl.textContent = MOCK_USER.bio;
+      var styleEl = document.getElementById('sidebarStyle');
+      if (styleEl) styleEl.textContent = style;
 
-    // Sidebar metrics
-    var metricsEl = document.getElementById('sidebarMetrics');
-    if (metricsEl) {
-      var metrics = [
-        { label: 'フォロー', value: MOCK_USER.following },
-        { label: 'フォロワー', value: MOCK_USER.followers },
-        { label: '投稿数', value: MOCK_USER.posts },
-        { label: 'いいね', value: MOCK_USER.likes }
-      ];
-      var html = '';
-      for (var i = 0; i < metrics.length; i++) {
-        html += '<div class="sidebar-metric">' +
-          '<div class="sidebar-metric-value">' + new Intl.NumberFormat('ja-JP').format(metrics[i].value) + '</div>' +
-          '<div class="sidebar-metric-label">' + metrics[i].label + '</div>' +
-        '</div>';
-      }
-      metricsEl.innerHTML = html;
+      var bioEl = document.getElementById('sidebarBio');
+      if (bioEl) bioEl.textContent = bio;
+
+      // Metrics (followers etc.) are not yet available from API — hide section
+      var metricsEl = document.getElementById('sidebarMetrics');
+      if (metricsEl) metricsEl.style.display = 'none';
     }
+
+    // Use REIJI_USER set by auth.js
+    if (window.REIJI_USER) {
+      applyProfile(window.REIJI_USER);
+      return;
+    }
+
+    // Poll for REIJI_USER (auth.js sets it asynchronously)
+    var pollInterval = setInterval(function () {
+      if (window.REIJI_USER) {
+        clearInterval(pollInterval);
+        applyProfile(window.REIJI_USER);
+      }
+    }, 50);
+    setTimeout(function () {
+      clearInterval(pollInterval);
+      applyProfile(null);
+    }, 5000);
   }
 
   function renderPnlCards() {
     var container = document.getElementById('pnlCards');
     if (!container) return;
 
-    var cards = [
-      {
-        label: '今月の損益',
-        value: MOCK_PNL_SUMMARY.thisMonth.total,
-        sub: '勝ち ' + MOCK_PNL_SUMMARY.thisMonth.winDays + '日 / 負け ' + MOCK_PNL_SUMMARY.thisMonth.lossDays + '日'
-      },
-      {
-        label: '今年の損益',
-        value: MOCK_PNL_SUMMARY.thisYear.total,
-        sub: '2026年1月〜'
-      },
-      {
-        label: '生涯損益',
-        value: MOCK_PNL_SUMMARY.lifetime.total,
-        sub: '全期間の累計'
-      }
-    ];
-
-    var html = '';
-    for (var i = 0; i < cards.length; i++) {
-      var c = cards[i];
-      var valueClass = c.value >= 0 ? 'text-profit' : 'text-loss';
-      html += '<div class="pnl-card">' +
-        '<div class="pnl-card-label">' + c.label + '</div>' +
-        '<div class="pnl-card-value ' + valueClass + '">' + formatYen(c.value) + '</div>' +
-        '<div class="pnl-card-sub">' + c.sub + '</div>' +
-      '</div>';
+    if (!window.REIJI_IS_LOGGED_IN && !localStorage.getItem('reiji_token')) {
+      container.innerHTML = '<div style="text-align:center;padding:2rem 1rem;color:var(--text-tertiary);font-size:var(--text-sm);">ログインすると損益データが表示されます</div>';
+      return;
     }
-    container.innerHTML = html;
+
+    apiFetch('/api/pnl/summary')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (data) {
+        var now = new Date();
+        var cards = [
+          {
+            label: '今月の損益',
+            value: data.month,
+            sub: '勝ち ' + data.win_days + '日 / 負け ' + data.loss_days + '日'
+          },
+          {
+            label: '今年の損益',
+            value: data.year,
+            sub: now.getFullYear() + '年1月〜'
+          },
+          {
+            label: '今日の損益',
+            value: data.today,
+            sub: now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate()
+          }
+        ];
+
+        var html = '';
+        for (var i = 0; i < cards.length; i++) {
+          var c = cards[i];
+          var valueClass = c.value >= 0 ? 'text-profit' : 'text-loss';
+          html += '<div class="pnl-card">' +
+            '<div class="pnl-card-label">' + c.label + '</div>' +
+            '<div class="pnl-card-value ' + valueClass + '">' + formatYen(c.value) + '</div>' +
+            '<div class="pnl-card-sub">' + c.sub + '</div>' +
+          '</div>';
+        }
+        container.innerHTML = html;
+      })
+      .catch(function () {
+        container.innerHTML = '<div class="pnl-card"><div class="pnl-card-label">データを取得できませんでした</div></div>';
+      });
   }
 
   function renderActivity() {
     var container = document.getElementById('activityList');
     if (!container) return;
 
-    var html = '';
-    for (var i = 0; i < MOCK_ACTIVITY.length; i++) {
-      var a = MOCK_ACTIVITY[i];
-      var badgeClass = 'badge-primary';
-      if (a.typeClass === 'profit') badgeClass = 'badge-profit';
-      else if (a.typeClass === 'loss') badgeClass = 'badge-loss';
-      else if (a.typeClass === 'accent') badgeClass = 'badge-accent';
-
-      html += '<div class="activity-item">' +
-        '<span class="activity-date">' + a.date.replace('2026-', '').replace('-', '/') + '</span>' +
-        '<span class="badge activity-type ' + badgeClass + '">' + a.type + '</span>' +
-        '<span class="activity-desc">' + a.desc + '</span>' +
+    container.innerHTML =
+      '<div style="text-align:center;padding:2rem 1rem;color:var(--text-tertiary);">' +
+        '<i class="fa-solid fa-clock" style="font-size:1.5rem;margin-bottom:0.5rem;display:block;"></i>' +
+        '<div>アクティビティ機能は準備中です</div>' +
       '</div>';
-    }
-    container.innerHTML = html;
   }
 
   function initMobileSidebar() {

@@ -3,35 +3,73 @@
  * Tab switching, table rendering
  */
 (function () {
+  var _marketsData = null;
+  var _trendingData = null;
+
   document.addEventListener('DOMContentLoaded', function () {
-    renderTable('marketcap');
+    fetchMarkets();
+    fetchTrending();
     initTabs();
   });
 
+  function fetchMarkets() {
+    fetch('/api/crypto/markets', {
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function (json) {
+      _marketsData = json.data;
+      renderTable('marketcap');
+    })
+    .catch(function () {
+      _marketsData = [];
+      renderTable('marketcap');
+    });
+  }
+
+  function fetchTrending() {
+    fetch('/api/crypto/trending', {
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function (res) {
+      if (!res.ok) throw new Error('API error');
+      return res.json();
+    })
+    .then(function (json) {
+      _trendingData = json.data;
+    })
+    .catch(function () {});
+  }
+
   function renderTable(tab) {
     var tbody = document.getElementById('cryptoTableBody');
-    if (!tbody || typeof MOCK_CRYPTO_ALL === 'undefined') return;
+    if (!tbody) return;
 
-    var data = [];
-    var i;
+    var data;
     if (tab === 'trending') {
-      for (i = 0; i < MOCK_CRYPTO_ALL.length; i++) {
-        if (MOCK_CRYPTO_ALL[i].trending) data.push(MOCK_CRYPTO_ALL[i]);
+      data = _trendingData;
+      if (!data) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:2rem;color:#888;">読み込み中...</td></tr>';
+        fetchTrending();
+        return;
       }
-      data.sort(function (a, b) { return b.change - a.change; });
     } else {
-      data = MOCK_CRYPTO_ALL.slice();
+      data = _marketsData;
+      if (!data) return;
     }
 
     var html = '';
-    for (i = 0; i < data.length; i++) {
+    for (var i = 0; i < data.length; i++) {
       var coin = data[i];
       var changeClass = coin.change >= 0 ? 'text-profit' : 'text-loss';
       var changeSign = coin.change >= 0 ? '+' : '';
       var priceStr = coin.price >= 1000
         ? '¥' + new Intl.NumberFormat('ja-JP').format(coin.price)
         : '¥' + coin.price.toFixed(4);
-      var rankDisplay = tab === 'trending' ? (i + 1) : coin.rank;
+      var rankDisplay = coin.rank || (i + 1);
 
       html += '<tr class="crypt-tr">' +
         '<td class="crypt-td crypt-td-rank">' + rankDisplay + '</td>' +

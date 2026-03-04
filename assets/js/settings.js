@@ -8,7 +8,8 @@
     initGoalForm();
     initCategories();
     initThemeOptions();
-    initToastActions();
+    initAccountTab();
+    initPnlChart();
   });
 
   /* ---- Tab Navigation ---- */
@@ -34,27 +35,104 @@
   function initProfileForm() {
     var bioEl = document.getElementById('settingsBio');
     var bioCount = document.getElementById('bioCount');
+    var nameEl = document.getElementById('settingsName');
+    var styleEl = document.getElementById('settingsStyle');
+    var avatarImg = document.getElementById('profileAvatar');
 
-    if (bioEl && bioCount) {
-      function updateCount() {
-        bioCount.textContent = bioEl.value.length + '/200';
+    function updateCount() {
+      if (bioEl && bioCount) bioCount.textContent = bioEl.value.length + '/200';
+    }
+    if (bioEl) bioEl.addEventListener('input', updateCount);
+
+    // Populate from REIJI_USER (set by auth.js)
+    function populateProfile() {
+      var user = window.REIJI_USER;
+      if (!user) return;
+      if (nameEl) nameEl.value = user.display_name || '';
+      if (bioEl) bioEl.value = user.bio || '';
+      if (styleEl) styleEl.value = user.investment_style || '';
+      if (avatarImg && user.avatar) {
+        avatarImg.src = '/storage/' + user.avatar;
       }
       updateCount();
-      bioEl.addEventListener('input', updateCount);
+    }
+
+    // Wait for auth.js to set REIJI_USER
+    var pollInterval = setInterval(function () {
+      if (window.REIJI_USER) {
+        clearInterval(pollInterval);
+        populateProfile();
+      }
+    }, 50);
+
+    // Avatar upload
+    var avatarBtn = document.querySelector('.settings-avatar-actions .btn');
+    if (avatarBtn) {
+      var fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = 'image/jpeg,image/png';
+      fileInput.style.display = 'none';
+      document.body.appendChild(fileInput);
+
+      avatarBtn.addEventListener('click', function () { fileInput.click(); });
+
+      fileInput.addEventListener('change', function () {
+        if (!this.files || !this.files[0]) return;
+        var file = this.files[0];
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('画像は2MB以下にしてください');
+          return;
+        }
+        var formData = new FormData();
+        formData.append('avatar', file);
+
+        apiFetch('/api/user/avatar', { method: 'POST', body: formData })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (d) { throw d; });
+            return res.json();
+          })
+          .then(function (data) {
+            if (avatarImg) avatarImg.src = data.avatar_url;
+            syncSidebarUser({ avatarUrl: data.avatar_url });
+            showToast('アバターを更新しました');
+          })
+          .catch(function (err) { showToast(err.message || 'アバターの更新に失敗しました'); });
+        this.value = '';
+      });
+    }
+
+    // Profile save
+    var saveBtn = document.getElementById('saveProfile');
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        apiFetch('/api/user/profile', {
+          method: 'PUT',
+          body: {
+            display_name: nameEl ? nameEl.value.trim() : null,
+            bio: bioEl ? bioEl.value.trim() : null,
+            investment_style: styleEl ? styleEl.value : null
+          }
+        })
+          .then(function (res) {
+            if (!res.ok) return res.json().then(function (d) { throw d; });
+            return res.json();
+          })
+          .then(function (data) {
+            if (data.user) {
+              window.REIJI_USER = data.user;
+              syncSidebarUser({ displayName: data.user.display_name || data.user.line_name });
+            }
+            showToast('プロフィールを保存しました');
+          })
+          .catch(function (err) { showToast(err.message || '保存に失敗しました'); });
+      });
     }
 
     var form = document.getElementById('profileForm');
     if (form) {
       form.addEventListener('submit', function (e) {
         e.preventDefault();
-        showToast('プロフィールを保存しました');
-      });
-    }
-
-    var saveBtn = document.getElementById('saveProfile');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', function () {
-        showToast('プロフィールを保存しました');
+        if (saveBtn) saveBtn.click();
       });
     }
   }
@@ -63,13 +141,24 @@
   function initGoalForm() {
     var amountInput = document.getElementById('settingsGoalAmount');
     var monthlyAvg = document.getElementById('goalMonthlyAvg');
+    var currentYear = new Date().getFullYear();
+
+    // Load current goal from API
+    apiFetch('/api/goals?year=' + currentYear)
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (data) {
+        if (data.amount && amountInput) {
+          amountInput.value = new Intl.NumberFormat('ja-JP').format(data.amount);
+          updateMonthly();
+        }
+      })
+      .catch(function () {});
 
     function updateMonthly() {
       if (!amountInput || !monthlyAvg) return;
       var raw = amountInput.value.replace(/[^0-9]/g, '');
       var amount = parseInt(raw) || 0;
 
-      // Format the input
       if (raw) {
         amountInput.value = new Intl.NumberFormat('ja-JP').format(amount);
       }
@@ -86,52 +175,196 @@
     var saveBtn = document.getElementById('saveGoal');
     if (saveBtn) {
       saveBtn.addEventListener('click', function () {
-        showToast('年間目標を保存しました');
+        var raw = amountInput ? amountInput.value.replace(/[^0-9]/g, '') : '0';
+        var amount = parseInt(raw) || 0;
+
+        apiFetch('/api/goals', {
+          method: 'POST',
+          body: { year: currentYear, amount: amount }
+        })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function () { showToast('年間目標を保存しました'); })
+          .catch(function () { showToast('保存に失敗しました'); });
       });
     }
   }
 
   /* ---- Category Management ---- */
+  var settingsCategories = [];
+  var CUSTOM_CATEGORY_LIMIT = 5;
+  var catModalEditingId = null;
+
   function initCategories() {
-    renderCategories();
+    fetchAndRenderCategories();
+    initCategoryModal();
 
     var addBtn = document.getElementById('addCategory');
     if (addBtn) {
       addBtn.addEventListener('click', function () {
-        showToast('カテゴリ追加機能（プロトタイプ）');
+        var customCount = settingsCategories.filter(function (c) { return c.user_id !== null && c.user_id !== undefined; }).length;
+        if (customCount >= CUSTOM_CATEGORY_LIMIT) {
+          showToast('カスタムカテゴリは最大' + CUSTOM_CATEGORY_LIMIT + '件までです');
+          return;
+        }
+        openCategoryModal(null);
       });
     }
+  }
+
+  function initCategoryModal() {
+    var modal = document.getElementById('categoryModal');
+    var closeBtn = document.getElementById('categoryModalClose');
+    var cancelBtn = document.getElementById('categoryModalCancel');
+    var saveBtn = document.getElementById('categoryModalSave');
+    var colorInput = document.getElementById('catModalColor');
+    var preview = document.getElementById('catModalColorPreview');
+    var codeEl = document.getElementById('catModalColorCode');
+
+    if (!modal) return;
+
+    if (colorInput) {
+      colorInput.addEventListener('input', function () {
+        if (preview) preview.style.background = this.value;
+        if (codeEl) codeEl.textContent = this.value;
+      });
+    }
+
+    function closeModal() { modal.classList.remove('open'); catModalEditingId = null; }
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+
+    if (saveBtn) {
+      saveBtn.addEventListener('click', function () {
+        var nameInput = document.getElementById('catModalName');
+        var name = nameInput ? nameInput.value.trim() : '';
+        var color = colorInput ? colorInput.value : '#888888';
+
+        if (!name) { showToast('カテゴリ名を入力してください'); return; }
+
+        if (catModalEditingId) {
+          apiFetch('/api/pnl/categories/' + catModalEditingId, {
+            method: 'PUT',
+            body: { name: name, color: color }
+          })
+            .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+            .then(function () {
+              showToast('カテゴリを更新しました');
+              closeModal();
+              fetchAndRenderCategories();
+            })
+            .catch(function () { showToast('更新に失敗しました'); });
+        } else {
+          apiFetch('/api/pnl/categories', {
+            method: 'POST',
+            body: { name: name, color: color }
+          })
+            .then(function (res) {
+              if (res.status === 422) return res.json().then(function (d) { throw new Error(d.message || '上限に達しています'); });
+              if (!res.ok) throw new Error('追加に失敗しました');
+              return res.json();
+            })
+            .then(function () {
+              showToast('カテゴリを追加しました');
+              closeModal();
+              fetchAndRenderCategories();
+            })
+            .catch(function (err) { showToast(err.message || '追加に失敗しました'); });
+        }
+      });
+    }
+  }
+
+  function openCategoryModal(cat) {
+    var modal = document.getElementById('categoryModal');
+    var titleEl = document.getElementById('categoryModalTitle');
+    var nameInput = document.getElementById('catModalName');
+    var colorInput = document.getElementById('catModalColor');
+    var preview = document.getElementById('catModalColorPreview');
+    var codeEl = document.getElementById('catModalColorCode');
+    var saveBtn = document.getElementById('categoryModalSave');
+    if (!modal) return;
+
+    if (cat) {
+      catModalEditingId = cat.id;
+      if (titleEl) titleEl.textContent = 'カテゴリを編集';
+      if (nameInput) nameInput.value = cat.name;
+      if (colorInput) colorInput.value = cat.color || '#888888';
+      if (saveBtn) saveBtn.textContent = '更新する';
+    } else {
+      catModalEditingId = null;
+      if (titleEl) titleEl.textContent = 'カテゴリを追加';
+      if (nameInput) nameInput.value = '';
+      if (colorInput) colorInput.value = '#888888';
+      if (saveBtn) saveBtn.textContent = '追加する';
+    }
+
+    var c = colorInput ? colorInput.value : '#888888';
+    if (preview) preview.style.background = c;
+    if (codeEl) codeEl.textContent = c;
+
+    modal.classList.add('open');
+    if (nameInput) nameInput.focus();
+  }
+
+  function fetchAndRenderCategories() {
+    apiFetch('/api/pnl/categories')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+      .then(function (cats) {
+        settingsCategories = cats;
+        renderCategories();
+      })
+      .catch(function () {
+        settingsCategories = [];
+        renderCategories();
+      });
   }
 
   function renderCategories() {
     var container = document.getElementById('categoryList');
     if (!container) return;
 
-    var html = '';
-    for (var i = 0; i < MOCK_CATEGORIES.length; i++) {
-      var cat = MOCK_CATEGORIES[i];
+    var customCount = settingsCategories.filter(function (c) { return c.user_id !== null && c.user_id !== undefined; }).length;
+
+    var html = '<div class="settings-cat-limit">カスタムカテゴリ: ' + customCount + ' / ' + CUSTOM_CATEGORY_LIMIT + '</div>';
+    for (var i = 0; i < settingsCategories.length; i++) {
+      var cat = settingsCategories[i];
+      var color = cat.color || '#888';
+      var isCustom = cat.user_id !== null && cat.user_id !== undefined;
       html += '<div class="settings-cat-item">' +
-        '<span class="settings-cat-dot" style="background: var(--' + cat.colorVar + ');"></span>' +
+        '<span class="settings-cat-dot" style="background: ' + color + ';"></span>' +
         '<span class="settings-cat-name">' + cat.name + '</span>' +
-        '<span class="settings-cat-id">' + cat.id + '</span>' +
-        '<div class="settings-cat-actions">' +
-          '<button class="settings-cat-btn edit" title="編集" data-id="' + cat.id + '"><i class="fa-solid fa-pen"></i></button>' +
-          '<button class="settings-cat-btn delete" title="削除" data-id="' + cat.id + '"><i class="fa-solid fa-xmark"></i></button>' +
-        '</div>' +
-      '</div>';
+        '<span class="settings-cat-id">' + (cat.slug || '') + '</span>' +
+        '<div class="settings-cat-actions">';
+      if (isCustom) {
+        html += '<button class="settings-cat-btn edit" title="編集" data-id="' + cat.id + '"><i class="fa-solid fa-pen"></i></button>' +
+          '<button class="settings-cat-btn delete" title="削除" data-id="' + cat.id + '"><i class="fa-solid fa-xmark"></i></button>';
+      }
+      html += '</div></div>';
     }
     container.innerHTML = html;
 
-    // Event listeners
     container.querySelectorAll('.settings-cat-btn.edit').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        showToast('カテゴリ編集機能（プロトタイプ）');
+        var id = this.getAttribute('data-id');
+        var cat = settingsCategories.find(function (c) { return String(c.id) === id; });
+        if (!cat) return;
+        openCategoryModal(cat);
       });
     });
 
     container.querySelectorAll('.settings-cat-btn.delete').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        showToast('カテゴリ削除機能（プロトタイプ）');
+        var id = this.getAttribute('data-id');
+        if (!confirm('このカテゴリを削除しますか？\nレコードがある場合は無効化されます。')) return;
+
+        apiFetch('/api/pnl/categories/' + id, { method: 'DELETE' })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function (data) {
+            showToast(data.message || 'カテゴリを削除しました');
+            fetchAndRenderCategories();
+          })
+          .catch(function () { showToast('削除に失敗しました'); });
       });
     });
   }
@@ -179,31 +412,367 @@
     });
   }
 
-  /* ---- Toast Actions (danger zone, export) ---- */
-  function initToastActions() {
+  /* ---- Account Tab ---- */
+  function initAccountTab() {
+    // Populate email from REIJI_USER
+    var pollInterval = setInterval(function () {
+      if (window.REIJI_USER) {
+        clearInterval(pollInterval);
+        var emailEl = document.getElementById('accountEmail');
+        if (emailEl) emailEl.textContent = window.REIJI_USER.email;
+      }
+    }, 50);
+
+    // Password change
+    var pwBtn = document.getElementById('changePasswordBtn');
+    var pwModal = document.getElementById('passwordModal');
+    if (pwBtn && pwModal) {
+      var pwCloseBtn = document.getElementById('pwModalClose');
+      var pwCancelBtn = document.getElementById('pwModalCancel');
+      var pwSaveBtn = document.getElementById('pwModalSave');
+
+      function closePwModal() {
+        pwModal.classList.remove('open');
+        var inputs = pwModal.querySelectorAll('input');
+        inputs.forEach(function (inp) { inp.value = ''; });
+      }
+
+      pwBtn.addEventListener('click', function () { pwModal.classList.add('open'); });
+      if (pwCloseBtn) pwCloseBtn.addEventListener('click', closePwModal);
+      if (pwCancelBtn) pwCancelBtn.addEventListener('click', closePwModal);
+      pwModal.addEventListener('click', function (e) { if (e.target === pwModal) closePwModal(); });
+
+      if (pwSaveBtn) {
+        pwSaveBtn.addEventListener('click', function () {
+          var current = document.getElementById('pwCurrent').value;
+          var newPw = document.getElementById('pwNew').value;
+          var confirmPw = document.getElementById('pwConfirm').value;
+
+          if (!current || !newPw || !confirmPw) {
+            showToast('すべての項目を入力してください');
+            return;
+          }
+          if (newPw.length > 8) {
+            showToast('パスワードは8文字以内にしてください');
+            return;
+          }
+          if (newPw !== confirmPw) {
+            showToast('パスワードが一致しません');
+            return;
+          }
+
+          apiFetch('/api/user/password', {
+            method: 'PUT',
+            body: {
+              current_password: current,
+              password: newPw,
+              password_confirmation: confirmPw
+            }
+          })
+            .then(function (res) {
+              if (res.status === 422) return res.json().then(function (d) { throw new Error(d.message); });
+              if (!res.ok) throw new Error('変更に失敗しました');
+              return res.json();
+            })
+            .then(function (data) {
+              showToast(data.message || 'パスワードを変更しました');
+              closePwModal();
+            })
+            .catch(function (err) { showToast(err.message || '変更に失敗しました'); });
+        });
+      }
+    }
+
+    // CSV export
     var exportBtn = document.getElementById('exportCsv');
     if (exportBtn) {
       exportBtn.addEventListener('click', function () {
-        showToast('CSVダウンロード機能（プロトタイプ）');
+        apiFetch('/api/user/pnl-export')
+          .then(function (res) {
+            if (!res.ok) throw new Error('エクスポートに失敗しました');
+            return res.blob();
+          })
+          .then(function (blob) {
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'pnl_export.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            showToast('CSVをダウンロードしました');
+          })
+          .catch(function () { showToast('エクスポートに失敗しました'); });
       });
     }
 
+    // Delete all data
     var deleteDataBtn = document.getElementById('deleteData');
     if (deleteDataBtn) {
       deleteDataBtn.addEventListener('click', function () {
-        if (confirm('本当にすべての損益データを削除しますか？\nこの操作は取り消せません。')) {
-          showToast('データを削除しました（プロトタイプ）');
-        }
+        if (!confirm('本当にすべてのデータを削除しますか？\nこの操作は取り消せません。')) return;
+
+        apiFetch('/api/user/pnl-data', { method: 'DELETE' })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function (data) { showToast(data.message || 'データを削除しました'); })
+          .catch(function () { showToast('削除に失敗しました'); });
       });
     }
 
+    // Delete account
     var deleteAccountBtn = document.getElementById('deleteAccount');
     if (deleteAccountBtn) {
       deleteAccountBtn.addEventListener('click', function () {
-        if (confirm('本当にアカウントを削除しますか？\nすべてのデータが失われます。')) {
-          showToast('アカウントを削除しました（プロトタイプ）');
-        }
+        if (!confirm('本当にアカウントを削除しますか？\nすべてのデータが失われます。')) return;
+
+        apiFetch('/api/user/account', { method: 'DELETE' })
+          .then(function (res) { return res.ok ? res.json() : Promise.reject(); })
+          .then(function () {
+            localStorage.removeItem('reiji_token');
+            localStorage.removeItem('reiji_user');
+            document.cookie = 'reiji_logged_in=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            window.location.replace('/login');
+          })
+          .catch(function () { showToast('削除に失敗しました'); });
       });
+    }
+  }
+
+  /* ---- P&L Area Chart ---- */
+  function initPnlChart() {
+    var tabs = document.querySelectorAll('.pnl-period-tab');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        renderPnlChart(parseInt(this.getAttribute('data-period')));
+      });
+    });
+    renderPnlChart(7);
+  }
+
+  function getPnlData(days) {
+    var today = new Date();
+    var data = [];
+    for (var i = days - 1; i >= 0; i--) {
+      var d = new Date(today);
+      d.setDate(d.getDate() - i);
+      data.push({
+        dateStr: String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'),
+        pnl: 0,
+        dateObj: new Date(d)
+      });
+    }
+    return data;
+  }
+
+  function getPnlDataFromApi(days) {
+    var today = new Date();
+    // Determine months needed
+    var startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - days + 1);
+
+    var months = [];
+    var d = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
+    while (d <= today) {
+      months.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+      d.setMonth(d.getMonth() + 1);
+    }
+
+    var promises = months.map(function (m) {
+      return apiFetch('/api/pnl/calendar?year=' + m.year + '&month=' + m.month)
+        .then(function (res) { return res.ok ? res.json() : { data: {} }; })
+        .catch(function () { return { data: {} }; });
+    });
+
+    return Promise.all(promises).then(function (results) {
+      // Build day map from all months
+      var dayMap = {};
+      for (var r = 0; r < results.length; r++) {
+        var calData = results[r].data || {};
+        var m = months[r];
+        for (var dayKey in calData) {
+          var dateStr = m.year + '-' + String(m.month).padStart(2, '0') + '-' + String(dayKey).padStart(2, '0');
+          dayMap[dateStr] = calData[dayKey].total || 0;
+        }
+      }
+
+      var data = [];
+      for (var i = days - 1; i >= 0; i--) {
+        var dd = new Date(today);
+        dd.setDate(dd.getDate() - i);
+        var key = dd.getFullYear() + '-' + String(dd.getMonth() + 1).padStart(2, '0') + '-' + String(dd.getDate()).padStart(2, '0');
+        data.push({
+          dateStr: String(dd.getMonth() + 1).padStart(2, '0') + '-' + String(dd.getDate()).padStart(2, '0'),
+          pnl: dayMap[key] || 0
+        });
+      }
+      return data;
+    });
+  }
+
+  function renderPnlChart(period) {
+    var container = document.getElementById('pnlChartArea');
+    var summaryEl = document.getElementById('pnlSummaryRow');
+    if (!container) return;
+
+    // Use API to get PnL data
+    getPnlDataFromApi(Math.max(period, 30))
+      .then(function (allData) {
+        var data = allData.slice(allData.length - period);
+        doRenderPnlChart(container, summaryEl, data, allData);
+      })
+      .catch(function () {
+        container.innerHTML = '';
+      });
+  }
+
+  function doRenderPnlChart(container, summaryEl, data, allData30) {
+    if (data.length === 0) { container.innerHTML = ''; return; }
+
+    // Cumulative P&L
+    var cumVals = [];
+    var sum = 0;
+    for (var i = 0; i < data.length; i++) {
+      sum += data[i].pnl;
+      cumVals.push(sum);
+    }
+
+    // Summary stats
+    var todayPnl = data[data.length - 1].pnl;
+    var sevenSum = 0;
+    var thirtySum = 0;
+    for (var j = 0; j < allData30.length; j++) {
+      thirtySum += allData30[j].pnl;
+      if (j >= allData30.length - 7) sevenSum += allData30[j].pnl;
+    }
+
+    if (summaryEl) {
+      summaryEl.innerHTML =
+        '<div class="pnl-summary-item">' +
+          '<div class="pnl-summary-label">\u4eca\u65e5\u306e\u640d\u76ca</div>' +
+          '<div class="pnl-summary-value ' + (todayPnl >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(todayPnl) + '</div>' +
+        '</div>' +
+        '<div class="pnl-summary-item">' +
+          '<div class="pnl-summary-label">7\u65e5\u9593\u306e\u640d\u76ca\u984d</div>' +
+          '<div class="pnl-summary-value ' + (sevenSum >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(sevenSum) + '</div>' +
+        '</div>' +
+        '<div class="pnl-summary-item">' +
+          '<div class="pnl-summary-label">30\u65e5\u9593\u640d\u76ca</div>' +
+          '<div class="pnl-summary-value ' + (thirtySum >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(thirtySum) + '</div>' +
+        '</div>';
+    }
+
+    // Chart label & value
+    var totalPnl = cumVals[cumVals.length - 1];
+    var chartColor = totalPnl >= 0 ? '#63b3ed' : '#ef4444';
+
+    // SVG dimensions
+    var W = 480, H = 220;
+    var PL = 56, PR = 16, PT = 16, PB = 28;
+    var cW = W - PL - PR;
+    var cH = H - PT - PB;
+
+    var maxV = Math.max.apply(null, cumVals);
+    var minV = Math.min.apply(null, cumVals);
+    var range = maxV - minV;
+    if (range === 0) range = 1;
+    maxV += range * 0.1;
+    minV -= range * 0.1;
+    range = maxV - minV;
+
+    function mx(idx) { return PL + (idx / Math.max(cumVals.length - 1, 1)) * cW; }
+    function my(val) { return PT + (1 - (val - minV) / range) * cH; }
+
+    // Build smooth path (Catmull-Rom to Bezier)
+    var pts = [];
+    for (var k = 0; k < cumVals.length; k++) {
+      pts.push({ x: mx(k), y: my(cumVals[k]) });
+    }
+
+    var linePath = '';
+    if (pts.length === 1) {
+      linePath = 'M' + pts[0].x + ',' + pts[0].y;
+    } else {
+      linePath = 'M' + pts[0].x + ',' + pts[0].y;
+      for (var s = 0; s < pts.length - 1; s++) {
+        var p0 = pts[Math.max(0, s - 1)];
+        var p1 = pts[s];
+        var p2 = pts[s + 1];
+        var p3 = pts[Math.min(pts.length - 1, s + 2)];
+        var cp1x = p1.x + (p2.x - p0.x) / 6;
+        var cp1y = p1.y + (p2.y - p0.y) / 6;
+        var cp2x = p2.x - (p3.x - p1.x) / 6;
+        var cp2y = p2.y - (p3.y - p1.y) / 6;
+        linePath += ' C' + cp1x.toFixed(1) + ',' + cp1y.toFixed(1) + ' ' + cp2x.toFixed(1) + ',' + cp2y.toFixed(1) + ' ' + p2.x.toFixed(1) + ',' + p2.y.toFixed(1);
+      }
+    }
+
+    var bottomY = PT + cH;
+    var areaPath = linePath + ' L' + pts[pts.length - 1].x.toFixed(1) + ',' + bottomY + ' L' + pts[0].x.toFixed(1) + ',' + bottomY + ' Z';
+
+    // Grid lines (5 levels)
+    var gridSvg = '';
+    for (var g = 0; g <= 4; g++) {
+      var yVal = minV + (range * g / 4);
+      var yPos = my(yVal);
+      gridSvg += '<line x1="' + PL + '" y1="' + yPos.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + yPos.toFixed(1) + '" stroke="var(--border-primary)" stroke-width="0.5" stroke-dasharray="4,2"/>';
+      var lbl = Math.abs(yVal) >= 10000 ? (yVal / 10000).toFixed(1) + '\u4e07' : Math.round(yVal).toLocaleString();
+      gridSvg += '<text x="' + (PL - 6) + '" y="' + (yPos + 3).toFixed(1) + '" text-anchor="end" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">' + lbl + '</text>';
+    }
+
+    // Zero line
+    if (minV < 0 && maxV > 0) {
+      var zy = my(0);
+      gridSvg += '<line x1="' + PL + '" y1="' + zy.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + zy.toFixed(1) + '" stroke="var(--text-tertiary)" stroke-width="0.5" stroke-opacity="0.5"/>';
+    }
+
+    // X-axis labels
+    var xSvg = '';
+    xSvg += '<text x="' + mx(0).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="start" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">' + data[0].dateStr + '</text>';
+    xSvg += '<text x="' + mx(data.length - 1).toFixed(1) + '" y="' + (H - 4) + '" text-anchor="end" font-size="9" fill="var(--text-tertiary)" font-family="var(--font-mono)">' + data[data.length - 1].dateStr + '</text>';
+
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="pnl-chart-svg" preserveAspectRatio="xMidYMid meet">' +
+      '<defs>' +
+        '<linearGradient id="pnlGrad" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="0%" stop-color="' + chartColor + '" stop-opacity="0.3"/>' +
+          '<stop offset="100%" stop-color="' + chartColor + '" stop-opacity="0.02"/>' +
+        '</linearGradient>' +
+      '</defs>' +
+      gridSvg +
+      '<path d="' + areaPath + '" fill="url(#pnlGrad)"/>' +
+      '<path d="' + linePath + '" fill="none" stroke="' + chartColor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      xSvg +
+    '</svg>';
+
+    // Chart header with total
+    var headerHtml = '<div class="pnl-chart-header">' +
+      '<span class="pnl-chart-label">\u640d\u76ca</span>' +
+      '<span class="pnl-chart-total ' + (totalPnl >= 0 ? 'text-profit' : 'text-loss') + '">' + formatPnlJPY(totalPnl) + '</span>' +
+    '</div>';
+
+    container.innerHTML = headerHtml + svg;
+  }
+
+  function formatPnlJPY(val) {
+    var prefix = val >= 0 ? '+' : '';
+    return prefix + new Intl.NumberFormat('ja-JP').format(val) + ' JPY';
+  }
+
+  /* ---- Sync sidebar user info ---- */
+  function syncSidebarUser(opts) {
+    if (opts.displayName) {
+      var nameEl = document.getElementById('rightUserName');
+      if (nameEl) nameEl.textContent = opts.displayName;
+      var mobileName = document.querySelector('.sidebar-mobile-user-name');
+      if (mobileName) mobileName.textContent = opts.displayName;
+    }
+    if (opts.avatarUrl) {
+      var avatarEl = document.getElementById('rightUserAvatar');
+      if (avatarEl) avatarEl.src = opts.avatarUrl;
+      var mobileAvatar = document.getElementById('mobileUserAvatar');
+      if (mobileAvatar) mobileAvatar.src = opts.avatarUrl;
     }
   }
 

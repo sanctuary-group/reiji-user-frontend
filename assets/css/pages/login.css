@@ -26,8 +26,8 @@
 }
 
 .login-logo {
-  width: 56px;
-  height: 56px;
+  height: 48px;
+  width: auto;
   margin: 0 auto var(--space-4);
 }
 
@@ -163,6 +163,32 @@
 /* ---- Login Form ---- */
 .login-form {
   margin-bottom: 0;
+}
+
+/* ---- Checkbox Label ---- */
+.form-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.form-checkbox-label input[type="checkbox"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.form-checkbox-label a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.form-checkbox-label a:hover {
+  opacity: 0.8;
 }
 
 /* ---- LINE Button ---- */

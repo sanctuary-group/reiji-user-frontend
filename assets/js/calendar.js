@@ -1,10 +1,16 @@
 /**
  * Calendar - Render, navigation, and day detail modal (view/edit)
+ * Uses API: GET/POST /api/pnl/calendar, GET /api/pnl/categories
  */
 (function () {
-  var currentYear = 2026;
-  var currentMonth = 2; // 1-indexed
-  var modalDay = null;  // currently open day number
+  var now = new Date();
+  var currentYear = now.getFullYear();
+  var currentMonth = now.getMonth() + 1;
+  var modalDay = null;
+
+  // Fetched data
+  var calendarData = {};
+  var calCategories = [];
 
   var onboardStep = 0;
   var totalOnboardSteps = 3;
@@ -37,18 +43,18 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     startClock();
-    renderCalendar();
+    fetchAndRender();
 
     document.getElementById('prevMonth').addEventListener('click', function () {
       currentMonth--;
       if (currentMonth < 1) { currentMonth = 12; currentYear--; }
-      renderCalendar();
+      fetchAndRender();
     });
 
     document.getElementById('nextMonth').addEventListener('click', function () {
       currentMonth++;
       if (currentMonth > 12) { currentMonth = 1; currentYear++; }
-      renderCalendar();
+      fetchAndRender();
     });
 
     // Modal close
@@ -81,6 +87,127 @@
     }, 800);
   });
 
+  function fetchAndRender() {
+    apiFetch('/api/pnl/calendar?year=' + currentYear + '&month=' + currentMonth)
+      .then(function (res) {
+        if (!res.ok) throw new Error('API error');
+        return res.json();
+      })
+      .then(function (json) {
+        calendarData = json.data || {};
+        calCategories = json.categories || [];
+        renderCalendar();
+      })
+      .catch(function () {
+        calendarData = {};
+        calCategories = [];
+        renderCalendar();
+      });
+
+    fetchRanking(currentYear, currentMonth);
+  }
+
+  /* ---- Ranking ---- */
+
+  function fetchRanking(year, month) {
+    apiFetch('/api/pnl/ranking?year=' + year + '&month=' + month)
+      .then(function (res) {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then(function (data) {
+        renderRanking(data);
+      })
+      .catch(function () {
+        var section = document.getElementById('rankingSection');
+        if (section) section.style.display = 'none';
+      });
+  }
+
+  function renderRanking(data) {
+    var section = document.getElementById('rankingSection');
+    var podium = document.getElementById('rankingPodium');
+    if (!section || !podium) return;
+
+    if (!data || data.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    // Reorder for podium: 2nd, 1st, 3rd
+    var ordered = [];
+    if (data.length >= 2) ordered.push(data[1]);
+    if (data.length >= 1) ordered.push(data[0]);
+    if (data.length >= 3) ordered.push(data[2]);
+
+    var medalIcons = { 1: 'fa-crown', 2: 'fa-medal', 3: 'fa-award' };
+    var rankClasses = { 1: 'gold', 2: 'silver', 3: 'bronze' };
+
+    var currentUserId = null;
+    try {
+      var stored = localStorage.getItem('reiji_user');
+      if (stored) currentUserId = JSON.parse(stored).id;
+    } catch (e) {}
+
+    var html = '';
+    for (var i = 0; i < ordered.length; i++) {
+      var item = ordered[i];
+      var rankClass = rankClasses[item.rank] || '';
+      var isMe = currentUserId && item.userId === currentUserId;
+      var meClass = isMe ? ' ranking-card-me' : '';
+
+      html += '<div class="ranking-card ranking-card-' + rankClass + meClass + '">' +
+        '<div class="ranking-medal">' +
+          '<i class="fa-solid ' + (medalIcons[item.rank] || 'fa-award') + '"></i>' +
+        '</div>' +
+        '<div class="ranking-rank">' + item.rank + '位</div>' +
+        '<div class="ranking-name">' + escapeHtml(item.name) + 'さん</div>' +
+        '<div class="ranking-pnl">' + formatYen(item.totalPnl) + '</div>' +
+      '</div>';
+    }
+
+    podium.innerHTML = html;
+    section.style.display = '';
+
+    // Add sparkle particles to gold card
+    var goldCard = podium.querySelector('.ranking-card-gold');
+    if (goldCard) addSparkles(goldCard, 6);
+
+    // Subtle sparkles on silver and bronze
+    var silverCard = podium.querySelector('.ranking-card-silver');
+    if (silverCard) addSparkles(silverCard, 3);
+    var bronzeCard = podium.querySelector('.ranking-card-bronze');
+    if (bronzeCard) addSparkles(bronzeCard, 3);
+  }
+
+  function addSparkles(el, count) {
+    for (var i = 0; i < count; i++) {
+      var s = document.createElement('span');
+      s.className = 'ranking-sparkle';
+      s.textContent = '✦';
+      s.style.left = (Math.random() * 80 + 10) + '%';
+      s.style.top = (Math.random() * 80 + 10) + '%';
+      s.style.animationDelay = (Math.random() * 3).toFixed(1) + 's';
+      s.style.animationDuration = (1.5 + Math.random() * 2).toFixed(1) + 's';
+      s.style.fontSize = (8 + Math.random() * 6) + 'px';
+      el.appendChild(s);
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(String(str)));
+    return div.innerHTML;
+  }
+
+  function getCatById(id) {
+    for (var i = 0; i < calCategories.length; i++) {
+      if (calCategories[i].id === id) return calCategories[i];
+    }
+    return null;
+  }
+
   function startClock() {
     var el = document.getElementById('navDatetime');
     if (!el) return;
@@ -107,8 +234,7 @@
   }
 
   function renderCalendar() {
-    var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
-    var data = MOCK_CALENDAR[key] || {};
+    var data = calendarData;
 
     // Update title
     document.getElementById('calTitle').textContent = currentYear + '年' + currentMonth + '月';
@@ -130,8 +256,9 @@
       if (entry.total < 0) lossDays++;
       for (var c = 0; c < entry.categories.length; c++) {
         var cat = entry.categories[c];
-        if (!catTotals[cat.id]) catTotals[cat.id] = 0;
-        catTotals[cat.id] += cat.amount;
+        var catId = cat.id;
+        if (!catTotals[catId]) catTotals[catId] = 0;
+        catTotals[catId] += cat.amount;
       }
     }
 
@@ -144,12 +271,12 @@
 
     // Render category badges
     var catHtml = '';
-    for (var i = 0; i < MOCK_CATEGORIES.length; i++) {
-      var mc = MOCK_CATEGORIES[i];
+    for (var i = 0; i < calCategories.length; i++) {
+      var mc = calCategories[i];
       var amount = catTotals[mc.id] || 0;
       if (amount === 0) continue;
-      catHtml += '<div class="cat-badge" style="background: var(--' + mc.colorVar + '-bg); color: var(--' + mc.colorVar + ');">' +
-        '<span class="cat-badge-dot" style="background: var(--' + mc.colorVar + ');"></span>' +
+      catHtml += '<div class="cat-badge" style="background: ' + mc.color + '20; color: ' + mc.color + ';">' +
+        '<span class="cat-badge-dot" style="background: ' + mc.color + ';"></span>' +
         mc.name + ': <span class="cat-badge-amount">' + formatYen(amount) + '</span>' +
       '</div>';
     }
@@ -181,9 +308,9 @@
 
         dotsHtml = '<div class="cal-day-cats">';
         for (var ci = 0; ci < dayData.categories.length; ci++) {
-          var catInfo = getCategoryById(dayData.categories[ci].id);
+          var catInfo = getCatById(dayData.categories[ci].id);
           if (catInfo) {
-            dotsHtml += '<span class="cal-day-cat-dot" style="background: var(--' + catInfo.colorVar + ');" title="' + catInfo.name + '"></span>';
+            dotsHtml += '<span class="cal-day-cat-dot" style="background: ' + catInfo.color + ';" title="' + catInfo.name + '"></span>';
           }
         }
         dotsHtml += '</div>';
@@ -255,12 +382,13 @@
       bodyHtml += '<div class="modal-cat-list">';
       for (var i = 0; i < dayData.categories.length; i++) {
         var cat = dayData.categories[i];
-        var catInfo = getCategoryById(cat.id);
+        var catInfo = getCatById(cat.id);
         var amtClass = cat.amount >= 0 ? 'text-profit' : 'text-loss';
+        var dotColor = catInfo ? catInfo.color : 'var(--color-primary)';
         bodyHtml += '<div class="modal-cat-item">' +
           '<span class="modal-cat-name">' +
-            '<span class="cal-day-cat-dot" style="background: var(--' + (catInfo ? catInfo.colorVar : 'color-primary') + ');"></span>' +
-            (catInfo ? catInfo.name : cat.id) +
+            '<span class="cal-day-cat-dot" style="background: ' + dotColor + ';"></span>' +
+            (catInfo ? catInfo.name : 'カテゴリ') +
           '</span>' +
           '<span class="modal-cat-amount ' + amtClass + '">' + formatYen(cat.amount) + '</span>' +
         '</div>';
@@ -306,8 +434,8 @@
       '<div class="modal-edit-label">カテゴリを選択:</div>' +
       '<div class="modal-edit-cats">';
 
-    for (var c = 0; c < MOCK_CATEGORIES.length; c++) {
-      var mc = MOCK_CATEGORIES[c];
+    for (var c = 0; c < calCategories.length; c++) {
+      var mc = calCategories[c];
       var hasData = existingAmounts.hasOwnProperty(mc.id);
       var amount = hasData ? existingAmounts[mc.id] : '';
       var checked = hasData ? ' checked' : '';
@@ -315,7 +443,7 @@
 
       html += '<label class="modal-edit-cat-row">' +
         '<input type="checkbox" class="modal-edit-check" data-cat="' + mc.id + '"' + checked + '>' +
-        '<span class="modal-edit-cat-dot" style="background: var(--' + mc.colorVar + ');"></span>' +
+        '<span class="modal-edit-cat-dot" style="background: ' + mc.color + ';"></span>' +
         '<span class="modal-edit-cat-name">' + mc.name + '</span>' +
         '<input type="number" class="form-input modal-edit-amount" data-cat="' + mc.id + '"' +
           ' placeholder="0" value="' + (hasData ? amount : '') + '"' + disabled + '>' +
@@ -324,6 +452,10 @@
     }
 
     html += '</div>' +
+      '<div class="modal-edit-comment">' +
+        '<label class="modal-edit-label" for="editComment">メモ:</label>' +
+        '<input type="text" class="form-input" id="editComment" placeholder="メモを入力" maxlength="500" value="' + (dayData && dayData.comment ? dayData.comment : '') + '">' +
+      '</div>' +
       '<div class="modal-edit-total">' +
         '<span class="modal-edit-total-label">合計</span>' +
         '<span class="modal-edit-total-value" id="editTotal">' + formatYen(dayData ? dayData.total : 0) + '</span>' +
@@ -365,9 +497,7 @@
 
     // Cancel
     document.getElementById('editCancel').addEventListener('click', function () {
-      var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
-      var data = MOCK_CALENDAR[key] || {};
-      showViewMode(day, data[day]);
+      showViewMode(day, calendarData[day]);
     });
 
     // Save
@@ -394,42 +524,47 @@
   }
 
   function saveEntry(day) {
-    var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
-    if (!MOCK_CALENDAR[key]) MOCK_CALENDAR[key] = {};
-
     var categories = [];
-    var total = 0;
     var checks = document.querySelectorAll('.modal-edit-check');
 
     checks.forEach(function (cb) {
       if (!cb.checked) return;
-      var catId = cb.getAttribute('data-cat');
+      var catId = parseInt(cb.getAttribute('data-cat'));
       var input = document.querySelector('.modal-edit-amount[data-cat="' + catId + '"]');
       var val = parseFloat(input.value) || 0;
-      categories.push({ id: catId, amount: val });
-      total += val;
+      categories.push({ category_id: catId, amount: val });
     });
 
-    if (categories.length === 0) {
-      // No categories selected — remove entry
-      delete MOCK_CALENDAR[key][day];
-    } else {
-      // Preserve existing comment if any
-      var existing = MOCK_CALENDAR[key][day];
-      var comment = existing ? existing.comment : '';
-      MOCK_CALENDAR[key][day] = {
-        total: total,
+    var commentEl = document.getElementById('editComment');
+    var comment = commentEl ? commentEl.value.trim() : '';
+
+    var dateStr = currentYear + '-' + String(currentMonth).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+
+    var saveBtn = document.getElementById('editSave');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '保存中...';
+
+    apiFetch('/api/pnl/calendar', {
+      method: 'POST',
+      body: {
+        date: dateStr,
         categories: categories,
-        comment: comment
-      };
-    }
-
-    // Re-render calendar grid
-    renderCalendar();
-
-    // Show updated view mode
-    var data = MOCK_CALENDAR[key] || {};
-    showViewMode(day, data[day]);
+        comment: comment || null
+      }
+    })
+    .then(function (res) {
+      if (!res.ok) return res.json().then(function (d) { throw d; });
+      return res.json();
+    })
+    .then(function () {
+      location.reload();
+    })
+    .catch(function (err) {
+      var msg = (err && err.message) ? err.message : '保存に失敗しました';
+      showGlobalToast(msg, 'error');
+      saveBtn.disabled = false;
+      saveBtn.textContent = '保存する';
+    });
   }
 
   /* ---- Onboarding Guide ---- */
@@ -550,9 +685,7 @@
                        document.querySelector('.cal-day:not(.other-month)');
       if (targetCell) {
         var day = parseInt(targetCell.getAttribute('data-day'));
-        var key = currentYear + '-' + String(currentMonth).padStart(2, '0');
-        var data = MOCK_CALENDAR[key] || {};
-        openModal(day, data[day]);
+        openModal(day, calendarData[day]);
       }
 
       // Wait for modal to render, then show step

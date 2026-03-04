@@ -11,23 +11,7 @@
     var container = document.getElementById('popularUsers');
     if (!container) return;
 
-    var html = '';
-    for (var i = 0; i < MOCK_POPULAR_USERS.length; i++) {
-      var user = MOCK_POPULAR_USERS[i];
-      var pnlClass = user.pnlMonth >= 0 ? 'text-profit' : 'text-loss';
-      var pnlText = formatYen(user.pnlMonth);
-
-      html += '<div class="card user-card">' +
-        '<span class="user-card-rank">' + (i + 1) + '</span>' +
-        '<div class="avatar"><img src="assets/img/avatars/default.svg" alt=""></div>' +
-        '<div class="user-card-info">' +
-          '<div class="user-card-name">' + user.name + '</div>' +
-          '<div class="user-card-style">' + user.style + '</div>' +
-        '</div>' +
-        '<span class="user-card-pnl ' + pnlClass + '">' + pnlText + '</span>' +
-      '</div>';
-    }
-    container.innerHTML = html;
+    container.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-tertiary);grid-column:1/-1;">人気ユーザー機能は準備中です</div>';
   }
 
   function initScrollAnimations() {
